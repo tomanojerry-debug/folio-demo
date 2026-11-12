@@ -2,9 +2,9 @@
 
 Folio 把散落的链接和文字整理成可以回看、串联和继续写的个人展览。Tag 是 Folio 的桌面伙伴，陪你读网页、留下收藏、找回以前读过的资料。
 
-[![观看 Folio V6 产品演示，时长 50 秒](docs/folio-demo-v6-poster.jpg)](https://tomanojerry-debug.github.io/folio-demo/)
+[![观看 Folio V6 产品演示，时长 60 秒](docs/folio-demo-v6-poster.jpg)](https://tomanojerry-debug.github.io/folio-demo/)
 
-[观看 Folio V6 演示（50 秒）](https://tomanojerry-debug.github.io/folio-demo/)
+[观看 Folio V6 演示（60 秒）](https://tomanojerry-debug.github.io/folio-demo/)
 
 本仓库包含 Web 工作台、macOS 客户端源码和可在本机打开的示例展览。
 
