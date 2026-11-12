@@ -6,7 +6,7 @@ Folio 把散落的链接和文字整理成可以回看、串联和继续写的�
 
 [观看 Folio V6 演示（60 秒）](https://tomanojerry-debug.github.io/folio-demo/)
 
-[下载 Mac 客户端源码](https://github.com/tomanojerry-debug/folio-demo/archive/refs/heads/main.zip) · [本地安装说明](#在-macos-上使用-tag)
+[Web 在线体验](https://101.34.60.121/folio-demo/try/) · [下载 Mac 客户端源码](https://github.com/tomanojerry-debug/folio-demo/archive/refs/heads/main.zip) · [本地安装说明](#在-macos-上使用-tag)
 
 本仓库包含 Web 工作台、macOS 客户端源码和可在本机打开的示例展览。
 
