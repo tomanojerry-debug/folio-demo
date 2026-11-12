@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="观看 50 秒 Folio V6 演示：和 Tag 一起读网页、收藏、策展并留下手记。">
+  <title>Folio V6 · 产品演示</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.55 system-ui, sans-serif; background: #121918; color: #f4f3ee; }
+    * { box-sizing: border-box; }
+    body { min-height: 100svh; margin: 0; display: grid; align-items: center; background: radial-gradient(ellipse at 65% 0, #253a31, transparent 70%); }
+    main { width: min(1100px, calc(100% - 40px)); margin: 40px auto; }
+    header { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+    h1 { font: 400 clamp(25px, 5vw, 42px)/1.15 Georgia, serif; margin: 0; }
+    header p, footer { margin: 0; color: #bac7bd; }
+    video { display: block; width: 100%; aspect-ratio: 16 / 9; border: 1px solid #4e5d53; border-radius: 14px; background: #090d0c; }
+    footer { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 18px; font-size: .875rem; }
+    a { color: #e0eddf; text-underline-offset: 3px; }
+    a:focus-visible, video:focus-visible { outline: 2px solid #c5e6bd; outline-offset: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>Folio V6 · 产品演示</h1><p>50 秒 · 有声</p></header>
+    <video controls playsinline preload="metadata" poster="./folio-demo-v6-poster.jpg" aria-label="Folio V6 产品演示">
+      <source src="./folio-demo-v6.mp4" type="video/mp4">
+      <a href="./folio-demo-v6.mp4">打开 MP4 视频</a>
+    </video>
+    <footer>
+      <a href="https://github.com/tomanojerry-debug/folio-demo">返回 GitHub 仓库</a>
+      <a href="./folio-demo-v6.mp4" download>下载 MP4</a>
+      <a href="https://github.com/tomanojerry-debug/folio-demo/blob/main/THIRD_PARTY_NOTICES.md">素材来源与许可</a>
+    </footer>
+  </main>
+</body>
+</html>
