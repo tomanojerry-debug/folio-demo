@@ -1,6 +1,6 @@
 # Folio demo artwork sources
 
-Folio’s abstract PNG covers are original artwork generated for the demo. They do not depict or reproduce the publisher photos, logos, covers or diagrams from the linked articles.
+Folio’s PNG covers are original illustrations generated for the demo. For the animation music exhibition, each of the five covers illustrates a different musical idea from its linked work: an abrupt change in rhythm, the lingering mood of an ending song, tension in an underground score, a jazz ensemble, and the expansion of a piano theme into an orchestral arrangement. The illustrations contain no publisher photographs, logos, covers, or diagrams.
 
 The images used for the Impressionism exhibition are open access museum reproductions. The [Met’s Open Access policy](https://www.metmuseum.org/hubs/open-access) and [Cleveland Museum of Art’s Open Access policy](https://www.clevelandart.org/open-access) describe their CC0 designation.
 
