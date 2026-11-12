@@ -6,14 +6,14 @@ function secret() {
   if (!value || value.length < 32) throw fault("SERVICE_NOT_CONFIGURED", 503);
   return value;
 }
-export function sign(value, purpose, ttl = 30 * 86400) {
+export function sign(value, purpose, ttl = 30 * 86400, signingSecret = secret()) {
   const body = Buffer.from(JSON.stringify({ purpose, value, exp: Math.floor(Date.now() / 1000) + ttl })).toString("base64url");
-  return `${body}.${createHmac("sha256", secret()).update(body).digest("base64url")}`;
+  return `${body}.${createHmac("sha256", signingSecret).update(body).digest("base64url")}`;
 }
-export function verify(token, purpose) {
+export function verify(token, purpose, signingSecret) {
   if (typeof token !== "string" || token.length > 1_500_000) throw fault("RECEIPT_INVALID", 401);
   const [body, signature, extra] = token.split(".");
-  const expected = createHmac("sha256", secret()).update(body || "").digest();
+  const expected = createHmac("sha256", signingSecret ?? secret()).update(body || "").digest();
   const actual = Buffer.from(signature || "", "base64url");
   if (extra || actual.length !== expected.length || !timingSafeEqual(actual, expected)) throw fault("RECEIPT_INVALID", 401);
   let payload;

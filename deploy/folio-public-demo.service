@@ -1,0 +1,20 @@
+[Unit]
+Description=Folio public demo web service
+After=network.target folio-public-ledger.service
+
+[Service]
+Type=simple
+User=folio-public-demo
+Group=folio-public-demo
+WorkingDirectory=/opt/folio-public-demo/current
+EnvironmentFile=/etc/folio-public-demo.env
+ExecStart=/usr/local/bin/node server/public-http.mjs
+Restart=on-failure
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

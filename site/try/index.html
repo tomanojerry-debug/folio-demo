@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在浏览器体验 Folio 的文字收藏，阅读示例展览并核对原始来源。">
+  <title>Folio 在线体验</title>
+  <link rel="icon" href="../curator/ink-avatar.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到内容</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#main"><img src="../curator/ink-avatar.svg" alt="" width="27" height="31">Folio</a>
+      <nav aria-label="体验导航">
+        <a href="#main">在线体验</a>
+        <a href="#exhibition">示例展览</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="shell trial" aria-labelledby="trial-heading">
+      <div class="intro">
+        <h1 id="trial-heading">用一段文字试试 Folio</h1>
+        <p>整理一条关于声音的观察，看看 Folio 怎样提取要点、保留原文。</p>
+      </div>
+      <div class="workspace">
+        <form id="trial-form" class="sample" aria-labelledby="sample-heading">
+          <h2 id="sample-heading">同一条路的两种声音</h2>
+          <p id="sample-text" class="sample-text">我沿同一条河岸走了两次。清晨，脚步和鸟鸣断断续续，录音里留着不少空白。傍晚，桥上的车声持续不断，水声几乎听不见。剪辑时，我保留清晨的停顿，让观众有时间看水面；进入傍晚镜头前，我先放进一小段车声，画面还没切换，听觉已经抵达下一处。两段画面拍的是同一条路，声音却让它们有了不同的节奏。</p>
+          <button id="submit" type="submit" disabled>整理这段示例文字</button>
+          <p class="sample-note">打开即用，无需登录或配置模型。</p>
+          <noscript><p>启用 JavaScript 即可提交示例文字。下方展览可以直接阅读。</p></noscript>
+        </form>
+        <section id="result-panel" class="result" aria-labelledby="result-heading">
+          <h2 id="result-heading">模型整理</h2>
+          <p id="status" role="status" aria-live="polite">摘要、要点和原文证据会显示在这里。</p>
+          <div id="result"></div>
+        </section>
+      </div>
+    </section>
+    <!-- The approved Folio exhibition text and sources come from desktop/server/demo-content.json. -->
+    <section id="exhibition" class="shell exhibition" aria-labelledby="exhibition-heading">
+      <div class="exhibit-cover">
+        <div class="cover-copy">
+          <p class="section-label">示例展览</p>
+          <h2 id="exhibition-heading">动画音乐如何讲故事</h2>
+          <p>从片头《KICK BACK》到《千与千寻》的交响改编，五件作品呈现音乐怎样开启、推进和延续一段故事。</p>
+        </div>
+        <img src="../curator/assets/demo-art/anime-music-spirited-away-one-summers-day.png" alt="金绿色的钢琴键盘伸向水面" width="560" height="380" loading="lazy">
+      </div>
+      <div class="chapters">
+        <section class="chapter" aria-labelledby="chapter-1">
+          <header><h3 id="chapter-1">片头打开，片尾回望</h3><p>先听《链锯人》片头怎样预告一集的节奏，再听《葬送的芙莉莲》片尾怎样留住故事里来不及说完的情绪。</p></header>
+          <div class="sources">
+            <article class="source"><img src="../curator/assets/demo-art/anime-music-chainsaw-kick-back.png" alt="" width="560" height="380" loading="lazy">
+              <div><h4>《链锯人》片头〈KICK BACK〉</h4><p>米津玄师为动画写词作曲，常田大希参与编曲。访谈追溯鼓打贝斯风格的样带，并解释米津怎样用调性和段落风格的突变回应导演的要求。</p>
+              <a href="https://www.billboard-japan.com/special/detail/3721/">Billboard JAPAN · 米津玄师访谈 <span aria-hidden="true">↗</span></a></div>
+            </article>
+            <article class="source"><img src="../curator/assets/demo-art/anime-music-frieren-anytime-anywhere.png" alt="" width="560" height="380" loading="lazy">
+              <div><h4>《葬送的芙莉莲》片尾〈Anytime Anywhere〉</h4><p>milet 谈到自己怎样从原作出发写片尾曲，以及 Evan Call 的编曲怎样改变她对歌曲成形的想象。文章附有与动画画面剪辑在一起的官方音乐视频。</p>
+              <a href="https://www.thefirsttimes.jp/interview/0000376403/">THE FIRST TIMES · milet 访谈 <span aria-hidden="true">↗</span></a></div>
+            </article>
+          </div>
+        </section>
+        <section class="chapter" aria-labelledby="chapter-2">
+          <header><h3 id="chapter-2">在故事中改变方向</h3><p>把耳朵转向《来自深渊》剧场版的剧中配乐。留意一段音乐怎样从展示世界的壮美过渡到下一章的不安。</p></header>
+          <div class="sources">
+            <article class="source"><img src="../curator/assets/demo-art/anime-music-abyss-faith.png" alt="" width="560" height="380" loading="lazy">
+              <div><h4>《来自深渊》剧中配乐〈Faith〉</h4><p>Kevin Penkin 在官方问答中讲到，他用〈Faith〉连接电视系列和波多尔多篇，让音乐从传达深渊之美逐渐转向厚重、不安的声响。</p>
+              <a href="https://miabyss.com/images/special/001/qa01.pdf">《来自深渊》动画官网 · Kevin Penkin 问答 <span aria-hidden="true">↗</span></a></div>
+            </article>
+          </div>
+        </section>
+        <section class="chapter" aria-labelledby="chapter-3">
+          <header><h3 id="chapter-3">离开画面以后</h3><p>跟随《星际牛仔》的虚拟合奏和《千与千寻》的交响改编，比较演奏方式怎样改变我们认识一首曲子的途径。</p></header>
+          <div class="sources">
+            <article class="source"><img src="../curator/assets/demo-art/anime-music-bebop-tank.png" alt="" width="560" height="380" loading="lazy">
+              <div><h4>《星际牛仔》片头〈TANK!〉的虚拟合奏</h4><p>菅野洋子作曲、编曲的动画片头曲，在 2020 年由她和 SEATBELTS 以虚拟合奏重新呈现。这支官方影片也是 Session Starducks 的制作示范。</p>
+              <a href="https://www.youtube.com/watch?v=2VsgkIE-RHg">菅野洋子官方频道 · SEATBELTS <span aria-hidden="true">↗</span></a></div>
+            </article>
+            <article class="source"><img src="../curator/assets/demo-art/anime-music-spirited-away-one-summers-day.png" alt="" width="560" height="380" loading="lazy">
+              <div><h4>《千与千寻》配乐〈One Summer’s Day〉的交响改编</h4><p>唱片发行说明收录《千与千寻》主题〈One Summer’s Day (The Name of Life)〉的英语版。久石让在伦敦指挥皇家爱乐乐团，录音从简朴的钢琴旋律逐步展开为完整的管弦乐。</p>
+              <a href="https://www.deutschegrammophon.com/en/catalogue/products/ocean-memory-joe-hisaishi-14679">Deutsche Grammophon · 久石让录音发行说明 <span aria-hidden="true">↗</span></a></div>
+            </article>
+          </div>
+        </section>
+      </div>
+      <p class="open-question">当一首曲子离开原来的画面，你听到的是故事留下的记忆，还是演奏带来的新感受？</p>
+    </section>
+  </main>
+</body>
+</html>

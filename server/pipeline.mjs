@@ -32,8 +32,7 @@ export function evidenceFor(text, id, segments) {
   }
   return chunks.map((content, index) => ({ evidence_id: `${id}#e${index + 1}`, source_field: "body_text", locator: `原文证据片段 ${index + 1}`, text: content }));
 }
-export async function model(callId, runtimeContext, { signal } = {}) {
-  const config = loadConfig({ ...process.env, AI_REQUEST_TIMEOUT_MS: process.env.AI_REQUEST_TIMEOUT_MS || "105000", AI_TEXT_MAX_TOKENS: process.env.AI_TEXT_MAX_TOKENS || "8192" });
+export async function model(callId, runtimeContext, { signal, config = loadConfig({ ...process.env, AI_REQUEST_TIMEOUT_MS: process.env.AI_REQUEST_TIMEOUT_MS || "105000", AI_TEXT_MAX_TOKENS: process.env.AI_TEXT_MAX_TOKENS || "8192" }) } = {}) {
   const started = Date.now();
   const result = await executeCall(config, { callId, runtimeContext }, { signal });
   const finishReason = result?.choices?.[0]?.finish_reason;
@@ -122,6 +121,7 @@ export async function ingest(input, deps = {}) {
   const extraction = { collectionId: id, ...normalizeExtraction(output, evidence), transcriptSource, trace };
   const collection = { id, title, url, source, type, status: extraction.status === "qualified" ? "ready" : extraction.status, addedAt: new Date().toISOString(), live: true };
   const signed = { collection, extraction };
+  if (deps.issueReceipt === false) return { ...signed, traceId: id };
   return { ...signed, receipt: sign(signed, "collection"), traceId: id };
 }
 

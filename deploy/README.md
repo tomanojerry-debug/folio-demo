@@ -18,3 +18,16 @@
 - 需要暂停新的模型调用时清空 `/etc/folio-demo.env` 中的 `ZHIPU_CODING_API_KEY`，重启 `folio-demo` 服务。确认会话端点报告 `enabled: false`，浏览器仍可打开工作台。旧会话的请求结果可能继续从缓存返回，需停止全部 API 流量时可在 Nginx 暂停 `/api/forme`。回滚应用时切回 `/opt/folio-demo/current` 的上一版本并重启服务。
 
 智谱的变量名沿用现有服务读取的配置键。模板将端点设为智谱标准 API。模型名称以该 Key 的权限为准。
+
+## 在腾讯云提供公开样例体验
+
+沿用当前 HTTPS 站点，在 `/folio-demo/try/` 提供样例页。浏览器通过同源 `/folio-demo/api/forme` 调用并显示结果。服务端按匿名签名会话缓存样例结果，最长 24 小时。公开服务只提供样例页、所需静态资源，以及处理固定文字样例的接口。模型尚未配置时仍可浏览样例展览。
+
+用两个独立的 systemd 服务部署。应用服务监听 `127.0.0.1:4186`，账本 Worker 仅监听 `127.0.0.1:8791`。Nginx 只代理应用服务，旧站点的路由和 Worker 保持原配置。应用在受信任的本机代理模式下使用 Nginx 写入的访客地址，额度账本记录加密散列。
+
+1. 检查端口和 HTTPS 站点配置。创建 `folio-public-demo` 和 `folio-public-ledger` 两个服务用户。将审查后的源码部署到 `/opt/folio-public-demo/releases/<version>`，把 `/opt/folio-public-demo/current` 和 `/opt/folio-public-ledger/current` 指向该版本。确认 unit 中的 Node 路径指向 Node.js 22 或更高版本。
+2. 将两个 `*.env.example` 模板分别复制到 `/etc/folio-public-demo.env` 与 `/etc/folio-public-ledger.env`，权限设为 `0600`。生成两个独立的至少 32 字符随机值，分别用于应用的 `FOLIO_PUBLIC_SESSION_SECRET` 和两份环境文件匹配的 Worker 令牌。将专用智谱标准 API Key 直接填入应用服务的 `FOLIO_PUBLIC_MODEL_API_KEY`。模型留空时服务以浏览模式运行。
+3. 安装 `folio-public-demo.service` 和 `folio-public-ledger.service`。`systemctl daemon-reload` 后，执行 `systemctl enable --now folio-public-ledger folio-public-demo`。systemd 为账本服务创建 `/var/lib/folio-public-ledger`。将 `nginx-public-demo.location.example` 复制为 `/etc/nginx/snippets/folio-public-demo-location.conf`，只在现有 HTTPS `server` 块增加一条 `include /etc/nginx/snippets/folio-public-demo-location.conf;`。执行 `nginx -t` 通过后重载。
+4. 验收 `/folio-demo/try/`、该路径下的图片及会话接口。访问 `/folio-demo/api/desktop/state` 应返回 `404`。使用两个独立浏览器会话检查结果隔离和原文引用。未配模型时会话报告 `enabled: false`。超过额度时返回 `429`，账本不可用时返回 `503`。真实模型验收会消耗一个请求额度。
+
+全站每 UTC 日最多发起 30 次模型请求，`FOLIO_PUBLIC_DAILY_LIMIT` 可设为 1–30。当前浏览器会话当天重复点击复用结果。清空模型 Key 并重启 `folio-public-demo` 可切回浏览模式。回滚时切回两个 `current` 链接的上一版本并重启这两个服务，也可移除专用 Nginx 路由后重载。

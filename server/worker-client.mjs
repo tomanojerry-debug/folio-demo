@@ -1,8 +1,6 @@
 import { fault } from "./errors.mjs";
 import { sign, verify } from "./receipts.mjs";
-export async function workerRequest(route, body) {
-  const base = process.env.FORME_WORKER_URL;
-  const key = process.env.FORME_WORKER_TOKEN;
+export async function workerRequest(route, body, { base = process.env.FORME_WORKER_URL, key = process.env.FORME_WORKER_TOKEN } = {}) {
   if (!base || !key) throw fault("WORKER_NOT_CONFIGURED", 503);
   const url = new URL(base);
   if (url.protocol !== "https:" && !(["127.0.0.1", "localhost"].includes(url.hostname) && !process.env.VERCEL)) throw fault("WORKER_NOT_CONFIGURED", 503);

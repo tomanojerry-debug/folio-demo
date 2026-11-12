@@ -7,15 +7,16 @@ import { messages, fault } from "./errors.mjs";
 import { startWorker, pollWorker } from "./worker-client.mjs";
 import { claim } from "./idempotency.mjs";
 import { sharedStateConfigured } from "./state-client.mjs";
+import { authorizePublicDemo, loadPublicDemoConfig, publicDemoSession, runPublicDemo } from "./public-demo.mjs";
 
-export async function readBody(req) {
+export async function readBody(req, limit = 3_500_000) {
   if (req.body !== undefined) {
     const value = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
-    if (Buffer.byteLength(value) > 3_500_000) throw fault("BODY_TOO_LARGE", 413);
+    if (Buffer.byteLength(value) > limit) throw fault("BODY_TOO_LARGE", 413);
     try { return JSON.parse(value); } catch { throw fault("INVALID_REQUEST"); }
   }
   let size = 0; const chunks = [];
-  for await (const chunk of req) { size += chunk.length; if (size > 3_500_000) throw fault("BODY_TOO_LARGE", 413); chunks.push(chunk); }
+  for await (const chunk of req) { size += chunk.length; if (size > limit) throw fault("BODY_TOO_LARGE", 413); chunks.push(chunk); }
   try { return JSON.parse(Buffer.concat(chunks).toString()); } catch { throw fault("INVALID_REQUEST"); }
 }
 export function send(res, status, data) {
@@ -36,6 +37,14 @@ export function createHandler(deps = {}) {
     try {
       const action = new URL(req.url, "http://localhost").searchParams.get("action") || "session";
       sameOrigin(req);
+      if (deps.publicApiPath || process.env.FOLIO_PUBLIC_DEMO === "1") {
+        const config = loadPublicDemoConfig();
+        if (action === "session" && req.method === "GET") return send(res, 200, publicDemoSession(req, res, config, deps.publicApiPath));
+        if (action !== "ingest" || req.method !== "POST") throw fault("INVALID_REQUEST", 404);
+        const visitor = authorizePublicDemo(req, config);
+        if (!(req.headers["content-type"] || "").startsWith("application/json")) throw fault("INVALID_REQUEST", 415);
+        return send(res, 200, await runPublicDemo(req, config, visitor, await readBody(req, 4096)));
+      }
       if (action === "session" && req.method === "GET") {
         const quotaReady = !(process.env.VERCEL || process.env.NODE_ENV === "production") || sharedStateConfigured();
         const configured = Boolean(process.env.FORME_SESSION_SECRET?.length >= 32 && process.env.ZHIPU_CODING_API_KEY && quotaReady);

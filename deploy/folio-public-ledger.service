@@ -1,0 +1,22 @@
+[Unit]
+Description=Folio public demo quota ledger
+After=network.target
+
+[Service]
+Type=simple
+User=folio-public-ledger
+Group=folio-public-ledger
+WorkingDirectory=/opt/folio-public-ledger/current
+StateDirectory=folio-public-ledger
+StateDirectoryMode=0700
+EnvironmentFile=/etc/folio-public-ledger.env
+ExecStart=/usr/local/bin/node worker/index.mjs
+Restart=on-failure
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target
