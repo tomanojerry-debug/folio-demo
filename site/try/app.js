@@ -1,9 +1,13 @@
 const sampleId = "folio-first-collection";
+const moduleURL = new URL(import.meta.url);
+const workspaceSample = moduleURL.pathname.endsWith("/try/sample/app.js");
+const endpoint = new URL(workspaceSample ? "../../api/forme" : "../api/forme", moduleURL);
 const form = document.querySelector("#trial-form");
 const submit = document.querySelector("#submit");
 const status = document.querySelector("#status");
 const output = document.querySelector("#result");
 
+const workspaceURL = workspaceSample ? new URL("../../prototype/immersive-exhibition/light.html", moduleURL) : null;
 const sampleTitle = document.querySelector("#sample-heading").textContent.trim();
 const sample = {
   mode: "text",
@@ -31,7 +35,9 @@ class DemoError extends Error {
 async function request(action, options = {}) {
   let response;
   try {
-    response = await fetch(`../api/forme?action=${action}`, {
+    const url = new URL(endpoint);
+    url.searchParams.set("action", action);
+    response = await fetch(url, {
       credentials: "same-origin",
       cache: "no-store",
       ...options,
@@ -59,7 +65,7 @@ function text(value, limit = 1200) {
   return typeof value === "string" ? value.trim().slice(0, limit) : "";
 }
 
-function showResult(data) {
+async function showResult(data) {
   const { extraction, collection } = data;
   if (!extraction || !collection) throw new DemoError("MODEL_OUTPUT_INVALID");
 
@@ -105,8 +111,25 @@ function showResult(data) {
   if (needsConfirmation) {
     fragment.append(node("p", text(extraction.hint) || "这份整理仍需结合原文核对。", "response-hint"));
   }
+  let saved = false;
+  if (workspaceURL) {
+    try {
+      const { savePublicSample } = await import(new URL("../../curator/public-library.js", moduleURL));
+      saved = savePublicSample(data, sample.content, window.localStorage);
+    } catch { /* Model results remain visible if browser storage is unavailable. */ }
+    if (saved) {
+      const link = node("a", "查看我的收藏 ↗", "response-open-collection");
+      const destination = new URL(workspaceURL);
+      destination.searchParams.set("collection", sampleId);
+      destination.hash = "inbox";
+      link.href = destination;
+      fragment.append(link);
+    }
+  }
   output.replaceChildren(fragment);
   status.textContent = needsConfirmation ? "已返回模型整理，部分内容待核对。" : "已完成模型整理。";
+  if (saved) status.textContent += " 已加入当前浏览器的收藏。";
+  else if (workspaceURL) status.textContent += " 当前浏览器暂未保存这条收藏。";
 }
 
 let requestId;
@@ -133,14 +156,21 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json", "x-forme-csrf": session.csrf },
       body: JSON.stringify({ ...sample, requestId }),
     });
-    showResult(result);
+    await showResult(result);
     completed = true;
   } catch (error) {
     status.textContent = error instanceof DemoError ? error.message : "这次没有取得整理结果，请重试。";
   } finally {
     output.removeAttribute("aria-busy");
     submit.disabled = completed;
-    submit.textContent = completed ? "已返回结果" : "整理这段示例文字";
+    submit.textContent = completed ? "已返回结果" : buttonText;
   }
 });
+const buttonText = workspaceSample ? "整理并加入收藏" : "整理这段示例文字";
+submit.textContent = buttonText;
+if (workspaceSample) {
+  const returnLink = document.querySelector('.header-inner nav a[href="#main"]');
+  returnLink.href = new URL("#home", workspaceURL);
+  returnLink.textContent = "返回工作台";
+}
 submit.disabled = false;

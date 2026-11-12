@@ -7,6 +7,7 @@ import { mountArticleReading } from './article-reading.js';
 import { curationStoryKey, renderCurationStory, mountCurationStory } from './curation-story.js';
 import { curationColor } from './curation-theme.js';
 import { mountReadingSettings } from './reading-settings.js';
+import { loadPublicLibrary } from './public-library.js';
 import { icon } from '../prototype/immersive-exhibition/light-workspace.js';
 
 const clone = (value) => structuredClone(value);
@@ -88,7 +89,10 @@ export function productWorkspaceURL(value) {
 }
 
 async function bootstrap() {
-  document.documentElement.classList.toggle("is-native", Boolean(window.webkit?.messageHandlers?.forme));
+  const publicWorkspace = document.documentElement.dataset.publicWorkspace === "true";
+  const baseURL = new URL("../", import.meta.url);
+  const publicLibrary = publicWorkspace ? await loadPublicLibrary(baseURL) : null;
+  document.documentElement.classList.toggle("is-native", Boolean(window.webkit?.messageHandlers?.forme) && !publicWorkspace);
   const productURL = productWorkspaceURL(location.href);
   if (productURL.href !== location.href) history.replaceState(history.state, "", productURL);
   let remote, current, store, refresh, openCollection, navigatePage, dialog, conversationShell, knowledgePanel, articleReading, curationStory, openReadingNote, readingSettings, selected = null;
@@ -118,11 +122,12 @@ async function bootstrap() {
     launchRequest = launchChat(detail).finally(() => { launchRequest=null; launchRevision=null; });
     return launchRequest;
   }
-  window.addEventListener('forme:workspace-chat', async event => {
+  if (!publicWorkspace) window.addEventListener('forme:workspace-chat', async event => {
     const result = await openChat(event.detail);
     window.dispatchEvent(new CustomEvent('forme:workspace-chat-result', { detail: result }));
   });
   async function api(route, body, method = "POST") {
+    if (publicLibrary) return publicLibrary.api(route, body);
     const response = await fetch(`/api/desktop/${route}`, body === undefined ? { cache: "no-store" } : { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const data = await response.json();
     if (response.status === 401 && data.code === "SIGN_IN_REQUIRED") signIn();
@@ -142,7 +147,7 @@ async function bootstrap() {
   }
   function queueWorkspace(ops) {
     if (!ops.length && !failedOps.length) return;
-    status("正在保存到这台电脑…");
+    status(publicWorkspace ? "正在保存到当前浏览器…" : "正在保存到这台电脑…");
     writes = writes.then(async () => {
       const batch = [...failedOps, ...ops];
       try { remote = (await api("workspace", { ops: batch })).state; failedOps = []; lastWriteError = null; status(""); }
@@ -223,7 +228,7 @@ async function bootstrap() {
       dialog.setAttribute('aria-labelledby', 'folio-story-title');
       curationStory = mountCurationStory({ container:dialog, exhibition, collections:current.collections, initialMode, api,
         onCreateNote: payload => closeGlassDialog(dialog).then(() => openReadingNote?.(payload)),
-        openChat: detail => closeGlassDialog(dialog).then(() => openChat(detail)),
+        openChat: publicWorkspace ? undefined : detail => closeGlassDialog(dialog).then(() => openChat(detail)),
         openCollection: id => { void closeGlassDialog(dialog).then(() => openCollection?.(id)); },
         openOriginal: (id, options) => { void closeGlassDialog(dialog).then(() => { openCollection?.(id); syncReading(); return articleReading?.openOriginal(id, { ...options, container:readingContainer }); }); },
       });
@@ -249,7 +254,10 @@ async function bootstrap() {
     catch (error) { status(errorMessage(error), true, () => { void action(route, body); }); if (dialog && !dialog.open) { draw(); dialog.showModal(); } }
   }
   const liveAI = {
-    async capture(input) { return await action("capture", input) || false; },
+    async capture(input) {
+      if (publicWorkspace) { location.assign(new URL("try/sample/", baseURL)); return false; }
+      return await action("capture", input) || false;
+    },
     async retry(collectionId) { if (!remote?.capabilities?.aiEnabled) return false; return await action("retry", { collectionId }) || false; },
     revise(collectionId, correction) { if (!remote?.capabilities?.aiEnabled || !current.collections.find((item) => item.id === collectionId)?.extraction) { status("请先连接整理服务，并完成原始内容的整理。", true); return false; } void action("revise", { collectionId, correction }); return true; },
     refreshSource(collectionId) { if (!remote?.capabilities?.aiEnabled) { status("请先连接智能整理服务。", true); return false; } void action("refresh-source", { collectionId }); return true; },
@@ -267,7 +275,7 @@ async function bootstrap() {
   remote = await api("state");
   current = mapDesktopState(remote);
   const logout = document.querySelector("[data-demo-logout]");
-  if (remote.capabilities?.demoAccount && logout) {
+  if (!publicWorkspace && remote.capabilities?.demoAccount && logout) {
     logout.hidden = false;
     logout.addEventListener("click", async () => {
       logout.disabled = true;
@@ -280,7 +288,7 @@ async function bootstrap() {
       } catch (error) { status(errorMessage(error), true, () => logout.click()); logout.disabled = false; }
     });
   }
-  const native = window.webkit?.messageHandlers?.forme;
+  const native = publicWorkspace ? null : window.webkit?.messageHandlers?.forme;
   if (native) document.addEventListener("click", event => {
     const anchor = event.target.closest?.('.folio-curation-story a[target="_blank"][href], a.collection-briefing-external[href]');
     if (!anchor || !/^https?:$/u.test(anchor.protocol)) return;
@@ -300,15 +308,16 @@ async function bootstrap() {
     clear() { status("私人收藏不会通过浏览器重置清除。", true); },
   };
   window.__FORME_DESKTOP__ = {
-    initialState: clone(current), storage: adapter, liveAI, openChat, flushWorkspace,
-    async collectionCoverColor(collectionId) { return (await api("collection-cover/color", { collectionId })).color; },
+    initialState: clone(current), storage: adapter, liveAI, flushWorkspace,
+    ...(publicWorkspace ? { sampleURL: new URL("try/sample/", baseURL).pathname } : { openChat }),
+    ...(!publicWorkspace ? { async collectionCoverColor(collectionId) { return (await api("collection-cover/color", { collectionId })).color; } } : {}),
     onWorkspaceRender: () => { conversationShell?.syncVisibility(); knowledgePanel?.sync(); syncReading(); },
     mountLiveAI(config) {
       ({ store, refresh, openCollection, navigatePage, openReadingNote } = config);
       articleReading = mountArticleReading({ api, getState: () => store.getState(),
         openCollection: id => openCollection?.(id), openExhibition: id => liveAI.show(id),
         onCreateNote: payload => config.openReadingNote?.(payload) });
-      knowledgePanel = mountKnowledgePanel({ api, getState:() => store.getState(), openCollection:id => openCollection?.(id),
+      if (!publicWorkspace) knowledgePanel = mountKnowledgePanel({ api, getState:() => store.getState(), openCollection:id => openCollection?.(id),
         openReading: (id, options) => { syncReading(); void articleReading.openOriginal(id, { ...options, container:readingContainer }); } });
       const readingObserver = new MutationObserver(syncReading);
       readingObserver.observe(document.body, { childList: true, subtree: true });
@@ -348,15 +357,15 @@ async function bootstrap() {
   window.formeNative = { ...(window.formeNative || {}), refresh: sync, async openExhibition(id) { await sync(); if (conversationShell?.isVisible()) conversationShell.leave('gallery'); liveAI.show(id); }, openCollection: showCollection };
   document.addEventListener("focusout", () => { setTimeout(() => { if (deferredRefresh) refreshSafely(); if (deferredDialog) draw(); }, 0); });
   window.addEventListener("focus", () => { if (failedOps.length) queueWorkspace([]); void sync(); });
-  if (typeof EventSource !== "undefined") {
+  if (!publicWorkspace && typeof EventSource !== "undefined") {
     const events = new EventSource("/api/desktop/events");
     events.addEventListener("open", () => { void sync(); });
     events.addEventListener("state", () => { void sync(); });
     events.addEventListener("signed-out", signIn);
     window.addEventListener("pagehide", () => events.close(), { once: true });
   }
-  await import("/prototype/immersive-exhibition/app.js");
-  await Promise.resolve().then(async () => {
+  await import("../prototype/immersive-exhibition/app.js");
+  if (!publicWorkspace) await Promise.resolve().then(async () => {
     conversationShell = mountWorkspaceConversationShell({
       getState:() => remote,
       navigatePage:page => navigatePage?.(page),
@@ -380,7 +389,9 @@ async function bootstrap() {
 
 if (typeof window !== "undefined" && typeof document !== "undefined") {
   bootstrap().catch((error) => {
-    document.body.innerHTML = `<main style="padding:60px;max-width:720px;margin:auto;font:16px/1.8 -apple-system,sans-serif"><h1>本机资料暂时没有打开</h1><p>${esc(errorMessage(error))}</p><p>请重新打开应用，现有资料会保留。</p><button id="desktop-reload">重新连接</button></main>`;
+    const publicWorkspace = document.documentElement.dataset.publicWorkspace === "true";
+    const heading = publicWorkspace ? "示例资料暂时没有打开" : "本机资料暂时没有打开";
+    document.body.innerHTML = `<main style="padding:60px;max-width:720px;margin:auto;font:16px/1.8 -apple-system,sans-serif"><h1>${heading}</h1><p>${esc(errorMessage(error))}</p><button id="desktop-reload">重新连接</button></main>`;
     document.getElementById("desktop-reload").onclick = () => location.reload();
   });
 }

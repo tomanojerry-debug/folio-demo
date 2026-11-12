@@ -2078,6 +2078,7 @@ function refreshInboxAllOverlay() {
 }
 
 function openCaptureOverlay(trigger = document.activeElement) {
+  if (DESKTOP_WORKSPACE?.sampleURL) { location.assign(DESKTOP_WORKSPACE.sampleURL); return; }
   if (document.querySelector(".capture-overlay")) return;
   if (LIGHT_PRESENTATION) captureReturnElement = trigger;
   inboxFilters.captureOpen = true;
@@ -4510,6 +4511,7 @@ window.addEventListener("resize", () => {
 document.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target;
+  if (form.matches("[data-public-link-form]")) return;
   if (form.dataset.form === "collection-tag") {
     const tag = String(new FormData(form).get("tag") || "").trim();
     if (!tag) return;
@@ -5345,6 +5347,7 @@ if (LIGHT_PRESENTATION) lightWorkspace.bindWorkspace({
   state,
   render: () => collectionLiveModal ? refreshCollectionView() : render(),
   galleryItems: galleryArchiveItems,
+  openCollection: liveAIOptions.openCollection,
   collectionCoverColor: DESKTOP_WORKSPACE?.collectionCoverColor,
   navigate: switchLightPage,
   capture: openCaptureOverlay,

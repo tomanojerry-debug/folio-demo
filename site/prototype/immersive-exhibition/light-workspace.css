@@ -437,3 +437,18 @@ html[data-presentation="light"][data-reduce-motion="true"] :is(.ws-sidebar,.ws-w
   .ws-sidebar-footer > :is(.ws-button,.ws-icon-button) { justify-content: center; width: 100%; padding-inline: 0; }
   .ws-sidebar-footer > .ws-button > span { display: none; }
 }
+
+[data-home-section="home"] .ws-public-sample {
+  min-height: 108px;
+  padding: 14px 16px;
+}
+.ws-public-link-row, .ws-public-sample-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ws-public-link-row input { flex: 1 1 auto; min-width: 0; }
+.ws-public-sample-tools { flex-wrap: wrap; gap: 6px 14px; color: var(--ws-muted); }
+.ws-public-sample-tools a { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.ws-public-sample-tools a svg { width: 15px; height: 15px; }

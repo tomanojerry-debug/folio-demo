@@ -160,7 +160,7 @@ export function renderWorkspace({ state: s, galleryItems = [], artwork = {} }) {
   if (page === "home") {
     content = renderHome(s, galleryItems, artwork);
   } else if (page === "inbox") {
-    content = `${heading(page, collections.length, button("收新", "toggle-capture", { primary: true, glyph: "plus", attrs: 'aria-haspopup="dialog"' }))}${searchBar(page, "搜索收藏、关键词或来源")}${filterBar([["all", "全部"], ["image", "图片"], ["video", "视频"], ["link", "网页"], ["text", "文字"]])}${collections.length ? `<div class="ws-collection-grid" data-workspace-grid data-layout="${preferences.layout}">${collections.map((c, i) => collectionCard(c, s, artwork, i)).join("")}</div>${noResults()}` : emptyState("还没有收藏", "添加网页、文字或图片，开始建立自己的收藏。", `${button("添加收藏", "toggle-capture", { primary: true, glyph: "plus" })}`)}`;
+    content = `${heading(page, collections.length, button(s.desktopCapabilities?.publicDemo ? "试用整理" : "收新", "toggle-capture", { primary: true, glyph: "plus", attrs: 'aria-haspopup="dialog"' }))}${searchBar(page, "搜索收藏、关键词或来源")}${filterBar([["all", "全部"], ["image", "图片"], ["video", "视频"], ["link", "网页"], ["text", "文字"]])}${collections.length ? `<div class="ws-collection-grid" data-workspace-grid data-layout="${preferences.layout}">${collections.map((c, i) => collectionCard(c, s, artwork, i)).join("")}</div>${noResults()}` : emptyState("还没有收藏", "添加网页、文字或图片，开始建立自己的收藏。", `${button("添加收藏", "toggle-capture", { primary: true, glyph: "plus" })}`)}`;
   } else if (page === "gallery") {
     const curating = (s.workspaceJobs || []).some(job => job.type === "curate" && ["queued", "running"].includes(job.status));
     const emptyDescription = s.desktopCapabilities?.autoCurate ? "收藏的文章达到成卡条件后，专题会自动出现在这里。"
@@ -681,6 +681,32 @@ function bindBrandCompanion() {
   });
 }
 
+function sourceLinkKey(value) {
+  if (typeof value !== "string" || !value.trim()) return "";
+  try {
+    const url = new URL(value);
+    if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) return "";
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^(utm_.*|fbclid|gclid)$/iu.test(key)) url.searchParams.delete(key);
+    }
+    url.searchParams.sort();
+    return `${url.host.replace(/^www\./iu, "")}${url.pathname.replace(/\/+$/u, "")}${url.search}`;
+  } catch { return ""; }
+}
+
+function openPublicLink(form, callbacks) {
+  const input = form.elements.namedItem("source");
+  const feedback = form.querySelector("#public-link-feedback");
+  const key = sourceLinkKey(input.value);
+  const collection = key && callbacks.state().collections.find(item => sourceLinkKey(item.url) === key);
+  if (!collection) {
+    feedback.textContent = "示例库里没有这个链接。可从收藏或展览复制一个来源链接再试。";
+    return;
+  }
+  feedback.textContent = "已找到对应收藏。";
+  callbacks.openCollection(collection.id);
+}
+
 export function bindWorkspace(callbacks) {
   workspaceCallbacks = callbacks;
   bindBrandCompanion();
@@ -715,6 +741,11 @@ export function bindWorkspace(callbacks) {
     updateHomeChatControls();
   });
   document.addEventListener("submit", event => {
+    if (event.target.matches("[data-public-link-form]")) {
+      event.preventDefault();
+      openPublicLink(event.target, callbacks);
+      return;
+    }
     if (!event.target.matches("[data-workspace-chat-form]")) return;
     event.preventDefault(); event.stopPropagation();
     if (chatComposing || chatPending) return;

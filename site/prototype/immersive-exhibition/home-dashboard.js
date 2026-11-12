@@ -96,6 +96,7 @@ function renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, cha
 export function renderHomeDashboard(s, galleryItems, {
   icon, renderCollectionCard, renderExhibitionCard, draft = "", pending = false, feedback = "", contextIds = [],
   chatAvailable = typeof window !== "undefined" && typeof window.__FORME_DESKTOP__?.openChat === "function",
+  sampleURL = typeof window !== "undefined" ? window.__FORME_DESKTOP__?.sampleURL : undefined,
 } = {}) {
   const model = homeWorkspaceModel(s, galleryItems);
   const today = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "long" }).format(new Date());
@@ -116,5 +117,11 @@ export function renderHomeDashboard(s, galleryItems, {
     kind: "collections", title: "推荐收藏", destination: "inbox", link: "查看我的收藏", empty: "还没有可推荐的收藏。", icon,
     cards: model.recommendations.map((recommendation, index) => renderCollectionCard(recommendation, index)),
   });
-  return `<header class="ws-desk-intro"><div><p class="ws-desk-date">${today}</p><h1>${title}</h1></div><button type="button" class="ws-button ws-desk-capture" data-action="toggle-capture">${icon("plus")}收新</button></header>${renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable })}${exhibitions}${recommendations}${working}<footer class="ws-desk-footer"><span>来自你的收藏</span><span>${icon("check")}你的收藏，始终属于你</span></footer>`;
+  const publicSample = capabilities?.publicDemo && sampleURL;
+  const capture = publicSample ? "" : `<button type="button" class="ws-button ws-desk-capture" data-action="toggle-capture">${icon("plus")}收新</button>`;
+  const composer = publicSample
+    ? `<section class="ws-desk-chat" aria-label="用 Tag 查看链接"><form data-public-link-form><div class="ws-desk-composer ws-public-sample"><label class="sr-only" for="public-source-link">交给 Tag 一个示例来源链接</label><div class="ws-public-link-row"><input class="input" id="public-source-link" name="source" type="url" placeholder="粘贴示例展览里的来源链接…" maxlength="2048" required aria-describedby="public-link-feedback"><button type="submit" class="ws-desk-send" aria-label="让 Tag 查看链接">${icon("up")}</button></div><div class="ws-public-sample-tools"><span id="public-link-feedback" role="status">Tag 可以打开示例库中的来源。</span><a class="ws-button" href="${escape(sampleURL)}">试用模型整理${icon("arrow")}</a></div></div></form></section>`
+    : renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable });
+  const footer = publicSample ? "" : `<footer class="ws-desk-footer"><span>来自你的收藏</span><span>${icon("check")}你的收藏，始终属于你</span></footer>`;
+  return `<header class="ws-desk-intro"><div><p class="ws-desk-date">${today}</p><h1>${title}</h1></div>${capture}</header>${composer}${exhibitions}${recommendations}${working}${footer}`;
 }

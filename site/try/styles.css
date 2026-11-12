@@ -83,3 +83,5 @@ button:disabled { opacity: .66; cursor: default; }
   .header-inner nav { gap: 12px; font-size: .88rem; }
   .source { grid-template-columns: 68px minmax(0, 1fr); gap: 11px; padding: 11px; }
 }
+
+.response-open-collection { display: inline-block; margin-top: 16px; color: var(--accent); font-weight: 650; }
