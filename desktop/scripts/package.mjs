@@ -9,7 +9,7 @@ const local = process.argv.slice(2).includes('--local');
 const nodeArchitecture = process.arch;
 const macArchitecture = nodeArchitecture === 'x64' ? 'x86_64' : nodeArchitecture;
 const notaryProfile = process.env.FOLIO_NOTARY_PROFILE?.trim();
-const runtimeRoots = ['desktop/server', 'server', 'site', 'package.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md'];
+const runtimeRoots = ['desktop/agent-skills', 'desktop/server', 'server', 'site', 'worker', 'package.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md'];
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -84,7 +84,7 @@ async function prepareRuntime(resources, staging, { identity, runtimeSignature }
 `);
   await run('/usr/bin/codesign', ['--force', '--sign', identity, ...runtimeSignature, '--entitlements', jitEntitlements, node]);
   await signBindings(dependencies, identity);
-  await run(node, ['--input-type=module', '-e', 'await import("sharp"); await import("onnxruntime-node");'], { cwd: runtime, env: { PATH: '/usr/bin:/bin' } });
+  await run(node, ['--input-type=module', '-e', 'await import("./desktop/server/index.mjs"); await import("sharp"); await import("onnxruntime-node");'], { cwd: runtime, env: { PATH: '/usr/bin:/bin' } });
   return identity;
 }
 

@@ -90,6 +90,8 @@ export async function build({ reuseNative = false, output = appPath, workDirecto
   for (const name of companionResources) {
     await copyFile(path.join(companionAssets, name), path.join(resources, name));
   }
+  const runtimeSignature = packaged && identity !== '-' ? ['--options', 'runtime', '--timestamp'] : [];
+  if (prepareRuntime) await prepareRuntime(resources, { identity, runtimeSignature });
   await run('/usr/bin/xcrun', ['swiftc', '-swift-version', '5', '-target', `${architecture}-apple-macosx${minimumSystem}`, '-O', '-module-cache-path', moduleCache,
     '-framework', 'AppKit', '-framework', 'WebKit', '-framework', 'ApplicationServices',
     nativeSource, '-o', binary]);
@@ -103,8 +105,6 @@ export async function build({ reuseNative = false, output = appPath, workDirecto
     ? '<key>FOLIOPackagedClient</key><true/>'
     : `<key>FORMEProjectRoot</key><string>${xml(projectRoot)}</string>
 <key>FORMENodePath</key><string>${xml(process.execPath)}</string>`;
-  const runtimeSignature = packaged && identity !== '-' ? ['--options', 'runtime', '--timestamp'] : [];
-  if (prepareRuntime) await prepareRuntime(resources, { identity, runtimeSignature });
   const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
