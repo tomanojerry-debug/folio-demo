@@ -1,0 +1,96 @@
+@font-face {
+  font-family: Quicksand;
+  src: url("/assets/fonts/quicksand-bold-latin.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  color: #eeeeef;
+  background: #191a1c;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif;
+  font-synthesis: none;
+  --login-muted: #a5a6ab;
+  --login-accent: #276cc6;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .62; }
+button:focus-visible, input:focus-visible { outline: 2px solid #80b7ff; outline-offset: 2px; }
+
+.login-layout {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 28px 24px 34px;
+}
+
+.login-panel { width: min(100%, 304px); }
+.login-header { margin-bottom: 24px; text-align: center; }
+
+.login-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font: 700 26px/1 Quicksand, sans-serif;
+  letter-spacing: -.055em;
+}
+.login-brand img { display: block; }
+
+.login-header h1 {
+  margin: 17px 0 0;
+  font-size: 25px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+#login-form { display: grid; gap: 13px; }
+.login-field { display: grid; gap: 5px; }
+.login-field label { font-size: 13px; font-weight: 550; }
+.login-field input {
+  width: 100%;
+  min-height: 43px;
+  padding: 8px 11px;
+  border: 1px solid #4a4c50;
+  border-radius: 6px;
+  color: inherit;
+  background: #232428;
+  font-size: 16px;
+}
+
+.password-field { position: relative; }
+#login-password { padding-right: 66px; }
+.password-toggle {
+  position: absolute;
+  inset: 4px 5px 4px auto;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--login-muted);
+  font-size: 13px;
+}
+.password-toggle:hover { background: #303237; }
+
+.login-submit {
+  min-height: 43px;
+  margin-top: 4px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--login-accent);
+  color: #fffefa;
+  font-weight: 600;
+  transition: background-color .15s ease;
+}
+.login-submit:hover:not(:disabled) { background: #2a73cf; }
+.login-message { margin: -2px 0 0; color: #ff9e96; font-size: 13px; }
+.login-footnote { margin: 15px 0 0; color: var(--login-muted); font-size: 12px; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-submit { transition: none; }
+}

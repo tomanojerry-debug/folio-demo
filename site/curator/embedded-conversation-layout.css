@@ -1,0 +1,16 @@
+/* Last layer for the embedded view. Its parent host owns workspace positioning.
+ * Three root classes intentionally outrank the two-class standalone body state;
+ * descendant component rules retain their relative specificity in generated CSS. */
+.conversation-surface.conversation-surface.conversation-surface { position:relative; display:flex; flex-direction:column; width:100%; height:100%; min-width:0; min-height:0; overflow:hidden; box-sizing:border-box; background:transparent; color:var(--ui-text,#ebedef); font-family:var(--ui-font-ui,var(--forme-font-ui,"PingFang SC",sans-serif)); }
+.conversation-surface.conversation-surface.conversation-surface[hidden] { display:none!important; }
+.conversation-surface.conversation-surface.conversation-surface .chat-panel { position:relative; inset:auto; display:flex; flex:1; min-width:0; min-height:0; width:100%; height:100%; max-height:none; border:0; border-radius:0; box-shadow:none; background:transparent; }
+.conversation-surface.conversation-surface.conversation-surface .chat-history-toggle,.conversation-surface.conversation-surface.conversation-surface .close-chat { display:none!important; }
+.conversation-surface.conversation-surface.conversation-surface .chat-header { flex:0 0 auto; padding:17px 28px; }
+.conversation-surface.conversation-surface.conversation-surface .chat-messages { min-height:0; flex:1; }
+.conversation-surface.conversation-surface.conversation-surface .chat-form { flex:0 0 auto; }
+.conversation-surface.conversation-surface.conversation-surface .toast { position:absolute; }
+.conversation-surface.conversation-surface.conversation-surface .service-notice { flex:0 0 auto; }
+@media(max-width:600px) {
+  .conversation-surface.conversation-surface.conversation-surface .chat-header { padding:13px 18px; }
+  .conversation-surface.conversation-surface.conversation-surface .chat-panel { width:100%; height:100%; }
+}

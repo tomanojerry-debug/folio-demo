@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Folio：和 Tag 一起，留下喜欢，让收藏慢慢成展。">
+  <title>Folio · 私人收藏馆</title>
+  <link rel="icon" type="image/svg+xml" href="/curator/ink-avatar.svg">
+  <link rel="stylesheet" href="/vendor/basecoat/basecoat-scoped.css">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./task-progress.css">
+  <link rel="stylesheet" href="/curator/ui-system.css?v=20261111-name-font">
+  <link rel="stylesheet" href="./glass-dialogs.css">
+  <link rel="stylesheet" href="./workspace-chat.css">
+  <link rel="stylesheet" href="./companion-avatar.css">
+  <link rel="stylesheet" href="./companion-sessions.css">
+  <script defer src="/vendor/basecoat/js/basecoat.min.js"></script>
+  <script defer src="/vendor/basecoat/js/dropdown-menu.min.js"></script>
+  <script src="./main.js" type="module"></script>
+</head>
+<body>
+  <div id="stage" class="stage-shell">
+    <header class="masthead">
+      <a class="wordmark" href="./" aria-label="Folio · 私人收藏馆首页"><img class="wordmark-companion" src="/curator/ink-avatar.svg" alt="">Folio<span class="wordmark-dot">·</span></a>
+      <span class="room-label">与你一起，慢慢收藏</span>
+      <button class="curator-link btn" type="button" data-action="chat" data-variant="ghost" data-size="sm"><span class="curator-mark" aria-hidden="true"><img src="/curator/ink-avatar.svg" alt=""></span><span><strong data-curator-name>Tag</strong><span class="quiet">你的私人策展人</span></span><span class="link-arrow" aria-hidden="true">↗</span></button>
+    </header>
+    <main class="stage-main" id="main-content">
+      <div class="room-heading" id="room-heading"><div><p class="eyebrow">那些让你停留的喜欢</p><h1>我的看展台</h1><p class="room-description">把喜欢的留下，让联系慢慢发生。</p></div><span class="date-label" id="today-label"></span></div>
+      <div class="room-toolbar" id="room-toolbar"><nav class="view-tabs" aria-label="看展台内容"><button type="button" class="view-tab is-active btn" data-view="exhibitions" aria-current="page" data-variant="ghost" data-size="sm">展览<span id="exhibition-count">0</span></button><button type="button" class="view-tab btn" data-view="collections" data-variant="ghost" data-size="sm">收藏<span id="collection-count">0</span></button></nav><button type="button" class="text-button btn" data-action="curate" data-variant="outline" data-size="sm">整理一场小展<span aria-hidden="true"> ↗</span></button></div>
+      <p class="service-notice" id="service-notice" hidden></p>
+      <div id="room-content" aria-live="polite"><div class="initial-state">正在打开你的看展台…</div></div>
+      <article id="reader" class="reader" hidden></article>
+    </main>
+    <footer class="room-footer"><span>Collect. Connect. Curate.</span></footer>
+  </div>
+
+  <aside id="chat-history" class="chat-history" aria-label="对话记录" hidden>
+    <header class="chat-history-brand"><a href="/prototype/immersive-exhibition/light.html" aria-label="返回 Folio 收藏馆">
+      <!-- Static brand artwork shares the same self-contained shell and design eye pose. -->
+      <img class="chat-brand-artwork" src="/curator/ink-avatar.svg" alt="" width="27" height="30">
+      <span>Folio</span><span class="chat-brand-return" aria-hidden="true">↗</span></a><button type="button" class="small-button icon-button" data-chat-toggle-history aria-label="收起对话记录" aria-controls="chat-history">×</button></header>
+    <button type="button" class="chat-new-conversation" data-chat-new><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>新建对话<span aria-hidden="true">⌘ N</span></button>
+    <label class="conversation-search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12.5 12.5 4 4"/></svg><input type="search" id="conversation-search" aria-label="搜索对话记录" placeholder="搜索对话" autocomplete="off"></label>
+    <nav id="conversation-list" class="conversation-list" aria-label="历史对话"></nav>
+    <footer class="chat-history-footer"><a href="/prototype/immersive-exhibition/light.html"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14v11H3zM6 3h8M7 6v11"/></svg>返回收藏馆<span aria-hidden="true">↗</span></a></footer>
+  </aside>
+  <button type="button" class="chat-history-shade" data-chat-history-shade aria-label="收起对话记录" hidden></button>
+  <section id="chat-panel" class="chat-panel" aria-label="和 Tag 对话" hidden>
+    <header class="chat-header"><button type="button" class="small-button icon-button chat-history-toggle" data-chat-toggle-history aria-label="展开对话记录" aria-controls="chat-history" aria-expanded="true" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3.5" width="14" height="13" rx="2"/><path d="M7.5 3.5v13"/></svg></button><div class="workspace-chat-heading" hidden><h1 id="conversation-title">和 Tag 对话</h1><span>与你的私人策展人一起，慢慢想清楚</span></div><span class="curator-mark" aria-hidden="true"><img src="/curator/ink-avatar.svg" alt=""></span><div class="chat-identity"><div class="identity-name"><strong data-curator-name>Tag</strong><span class="identity-badge">Folio</span></div><span id="curator-personality">安静敏锐 · 私人策展人</span></div><div class="chat-window-actions"><button class="small-button icon-button btn" type="button" data-action="profile" aria-label="策展人设定" data-tooltip="策展人设定" data-side="bottom" data-align="end" data-variant="ghost" data-size="icon-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5.5h12M4 14.5h12M7 3.5v4M13 12.5v4"/></svg></button><button class="small-button icon-button close-chat btn" type="button" data-action="close-chat" aria-label="收起对话" data-tooltip="收起对话" data-side="bottom" data-align="end" data-variant="ghost" data-size="icon-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg></button></div></header>
+    <div class="source-context" id="source-context" hidden>
+      <svg class="context-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="3.5" y="4" width="13" height="12" rx="2"/><path d="M3.5 7.5h13M6 5.8h.1M8 5.8h.1"/></svg>
+      <div><span id="context-label">正在一起看</span><strong id="context-title"></strong></div>
+      <button type="button" class="context-read-button" id="context-read-button" data-action="read-page" hidden>允许读取</button>
+      <button type="button" class="small-button icon-button btn" data-action="detach" aria-label="取消页面关联" data-tooltip="取消页面关联" data-variant="ghost" data-size="icon-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg></button>
+      <button type="button" class="text-button collect-page-button btn" id="collect-page-button" data-action="collect-page" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/></svg><span>收藏本页内容</span></button>
+      <details class="companion-source-menu" id="companion-source-menu" hidden>
+        <summary aria-label="页面选项" title="页面选项"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg></summary>
+        <div class="companion-source-menu-items"></div>
+      </details>
+    </div>
+    <div class="companion-session-heading" id="companion-session-heading" hidden>
+      <button type="button" id="companion-session-title" data-action="companion-history" aria-expanded="false" aria-controls="companion-session-menu">新对话</button>
+      <button type="button" data-action="companion-new" aria-label="新对话" data-tooltip="新对话">＋</button>
+      <button type="button" class="small-button icon-button btn" data-action="open-conversation" aria-label="在主窗口继续" data-tooltip="在主窗口继续" data-side="bottom" data-align="end" data-variant="ghost" data-size="icon-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M8 5h7v7"/></svg></button>
+      <div class="companion-session-menu" id="companion-session-menu" hidden><span>最近对话</span><nav id="companion-session-list" aria-label="最近对话"></nav></div>
+    </div>
+    <div class="companion-read-info"><span class="companion-read-time" id="companion-read-time" hidden></span><button type="button" id="companion-reread" data-action="companion-reread" hidden>重新读取</button></div>
+    <div class="companion-attachment-status" id="companion-attachment-status" role="status" hidden><strong></strong><span></span></div>
+    <section class="companion-page-choice" id="companion-page-choice" aria-label="页面切换" hidden>
+      <p id="companion-page-choice-label" role="status"></p>
+      <div id="companion-preview-actions" hidden><button type="button" id="companion-preview-action" data-action="companion-preview">吸附读取</button><button type="button" id="companion-preview-decline" data-action="companion-preview-decline">暂不读取</button></div>
+      <div><button type="button" id="companion-page-start" data-action="companion-read">读取并聊这页</button><button type="button" id="companion-page-keep" data-action="companion-keep">继续之前的话题</button><button type="button" id="companion-page-follow" data-action="companion-follow" hidden>跟随浏览器</button></div>
+      <button type="button" id="companion-window-recognition" data-action="enable-window-recognition" hidden>开启窗口识别</button>
+      <details id="companion-link-fallback" hidden>
+        <summary>粘贴链接或正文</summary>
+        <form id="companion-link-form">
+          <textarea name="source" aria-label="文章链接或正文" placeholder="粘贴原文链接或复制的正文…" rows="2" required maxlength="40000"></textarea>
+          <button type="submit">预览正文</button>
+        </form>
+        <button type="button" id="companion-link-save" hidden>收藏正文</button>
+        <p id="companion-link-status" role="status" hidden></p>
+      </details>
+    </section>
+    <button type="button" class="companion-previous" id="companion-previous" hidden>查看上次对话</button>
+    <div class="page-prompt" id="page-prompt" hidden role="group" aria-label="收藏当前页面"><p>要收藏这个页面吗？</p><div><button type="button" class="page-choice" data-action="collect-page">是，收藏本页</button><button type="button" class="page-choice is-quiet" data-action="decline-page">否，先聊聊</button></div></div>
+    <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+    <div id="copy-status" class="sr-only" role="status"></div>
+    <div class="chat-error" id="chat-error" role="alert" hidden><span id="chat-error-message"></span><button type="button" class="small-button btn" id="retry-message" data-action="retry-message" hidden data-variant="outline" data-size="sm">重新发送</button></div>
+    <form id="chat-form" class="chat-form"><div class="composer-field"><label class="sr-only" for="chat-input">发给策展人的链接或想法</label><textarea id="chat-input" name="message" rows="2" placeholder="发消息，或贴一条链接…" maxlength="60000" aria-describedby="composer-hint" required class="textarea"></textarea><button type="submit" class="solid-button send-button btn" id="send-button" aria-label="发送消息" data-tooltip="发送（回车键）" disabled data-size="sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15V5m-4 4 4-4 4 4"/></svg><span class="sr-only">发送</span></button></div><div class="composer-actions"><button type="button" class="text-button btn conversation-reference-button" data-action="choose-references" hidden><span aria-hidden="true">＋</span> 引用收藏</button><span class="composer-hint" id="composer-hint" aria-label="回车键发送，按住上档键再按回车键换行">回车发送 · ⇧＋回车换行</span></div></form>
+  </section>
+
+  <dialog id="profile-dialog" class="profile-dialog" aria-labelledby="profile-title" data-dialog-managed="profile">
+    <form id="profile-form" novalidate>
+      <header class="profile-header">
+        <h2 id="profile-title">策展人设定</h2>
+        <button class="small-button icon-button btn profile-close" type="button" data-action="close-profile" aria-label="关闭设定" data-variant="ghost" data-size="icon-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg></button>
+      </header>
+      <div class="profile-fields">
+        <div class="profile-field"><label class="field-label" for="profile-name">称呼</label><input id="profile-name" name="name" maxlength="30" required placeholder="Tag" class="input" autocomplete="off" aria-describedby="profile-error"></div>
+        <fieldset class="personality-fieldset"><legend>相处方式</legend><div class="personality-options">
+          <label><input type="radio" name="personality" value="安静敏锐" class="radio"><span><strong>安静敏锐</strong><small>细看，多想一点</small><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8 2.2 2.2 4.8-4.4"/></svg></span></label>
+          <label><input type="radio" name="personality" value="温柔有主见" class="radio"><span><strong>温柔有主见</strong><small>温和，也有判断</small><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8 2.2 2.2 4.8-4.4"/></svg></span></label>
+          <label><input type="radio" name="personality" value="活泼好奇" class="radio"><span><strong>活泼好奇</strong><small>一起发现新鲜事</small><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 8 2.2 2.2 4.8-4.4"/></svg></span></label>
+        </div></fieldset>
+        <div class="profile-field"><label class="field-label" for="profile-preferences">偏好的主题<span>可选</span></label><textarea id="profile-preferences" name="preferences" rows="3" maxlength="5000" placeholder="自然光、旧物，或最近让你在意的事…" class="textarea"></textarea></div>
+        <p id="profile-error" class="form-error" role="alert" hidden></p>
+      </div>
+      <footer class="dialog-bottom"><button class="solid-button btn" type="submit" id="profile-save" data-size="sm">保存设定<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 8 2.5 2.5L12 5"/></svg></button></footer>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

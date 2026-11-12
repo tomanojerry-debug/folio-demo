@@ -1,0 +1,53 @@
+.task-progress { color: #c7cbd2; margin: 18px 0 12px; font-size: 12px; line-height: 1.65; }
+.task-summary { color: #969da9; font-size: 10px; letter-spacing: .08em; margin-bottom: 8px; }
+.task-list, .task-steps { list-style: none; padding: 0; margin: 0; }
+.task-list { display: grid; gap: 8px; }
+.task-item { min-width: 0; padding: 12px; border: 1px solid #ffffff10; border-radius: 9px; background: #ffffff03; overflow-wrap: anywhere; }
+.task-item-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.task-name { color: #d8dce3; font-size: 12px; font-weight: 500; }
+.task-status { flex-shrink: 0; color: #949da8; font-size: 10px; }
+.task-item.is-failed .task-status, .task-error { color: #d9aaa2; }
+.task-item.is-running .task-status { color: #bbc9dc; }
+.task-item.is-review .task-status { color: #c7b99d; }
+.task-stage, .task-error { margin: 5px 0 0; font-size: 11px; }
+.task-stage { color: #9ba3af; }
+.task-subject { margin: 5px 0 0; color: #bfc6d1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.task-details { margin-top: 8px; }
+.task-detail-summary { color: #aab2be; font-size: 10px; cursor: pointer; width: fit-content; }
+.task-steps { padding: 7px 0 0 10px; border-left: 1px solid #ffffff12; margin: 7px 0 0 3px; }
+.task-step { display: flex; gap: 10px; justify-content: space-between; padding: 3px 0; color: #a5acb6; font-size: 10px; }
+.task-step-status { flex-shrink: 0; color: #8d97a5; }
+.task-step.is-failed .task-step-status { color: #d9aaa2; }
+.task-step.is-reused .task-step-status { color: #a6bda9; }
+.task-retry { margin-top: 10px; padding: 5px 9px; min-height: 30px; background: #ffffff08; border: 1px solid #ffffff20; border-radius: 6px; color: #d9dee6; font: inherit; font-size: 11px; cursor: pointer; }
+.task-retry:hover { background: #ffffff12; }
+.task-retry:disabled { opacity: .55; cursor: wait; }
+.task-retry:focus-visible, .task-detail-summary:focus-visible, .reference-collection:focus-visible { outline: 2px solid #b3c1d5; outline-offset: 3px; }
+.message-references { display: grid; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ffffff12; }
+.message-references>span, .message-scope { color: #969eaa; font-size: 10px; }
+.reference-collection { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; background: none; color: #c9d2df; font: inherit; font-size: 11px; text-align: left; line-height: 1.6; cursor: pointer; }
+.reference-collection:hover { color: #f1f3f7; }
+.reference-collection>span { flex-shrink: 0; }
+.message-scope { margin: 8px 0 0; }
+.message-web-sources { display: grid; gap: 12px; margin: 12px 0 4px; padding: 0; list-style: none; }
+.message-web-result { min-width: 0; }
+.message-web-result + .message-web-result { padding-top: 12px; border-top: 1px solid var(--ui-border,#ffffff16); }
+.message-web-link { display: block; border-radius: 3px; }
+.message-web-link:focus-visible { outline: 2px solid var(--ui-focus,#b3c1d5); outline-offset: 3px; }
+.message-web-link:hover .message-web-title { text-decoration: underline; text-underline-offset: 3px; }
+.message-web-origin { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--ui-muted,#a1a5ad); font-size: 11px; line-height: 1.5; }
+.message-web-origin time { margin-inline-start: 3px; }
+.message-web-icon { position: relative; display: inline-grid; place-items: center; flex: 0 0 16px; width: 16px; height: 16px; border-radius: 4px; background: #8295b92b; color: #c1d2ed; font-size: 10px; font-weight: 600; line-height: 1; }
+.message-web-icon.has-favicon { padding: 1px; background: #f5f5f5; }
+.message-web-icon img { width: 100%; height: 100%; border-radius: 3px; object-fit: contain; }
+.message-web-icon.is-wechat { background: #13a557; }
+.message-web-icon.is-wechat::before,.message-web-icon.is-wechat::after {
+  content: ""; position: absolute; width: 8px; height: 6px; border-radius: 50%;
+  background: radial-gradient(circle at 33% 43%,#0b8545 0 .5px,transparent .85px),
+    radial-gradient(circle at 67% 43%,#0b8545 0 .5px,transparent .85px),#fff;
+}
+.message-web-icon.is-wechat::before { left: 2px; top: 3px; }
+.message-web-icon.is-wechat::after { right: 2px; bottom: 3px; box-shadow: 0 0 0 1px #13a557; }
+.message-web-title { display: block; margin-top: 3px; color: var(--ui-text,#ebedef); font-size: 13px; font-weight: 600; line-height: 1.55; }
+.message-web-snippet { margin-top: 3px; color: var(--ui-muted,#a1a5ad); font-size: 12px; line-height: 1.6; }
+@media (pointer: coarse) { .task-retry, .reference-collection { min-height: 40px; } }

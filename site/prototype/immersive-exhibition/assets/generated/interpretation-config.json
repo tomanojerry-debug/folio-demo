@@ -1,0 +1,78 @@
+{
+  "defaults": {
+    "language": "默认简体中文",
+    "tone": "清楚、具体、尊重不确定性"
+  },
+  "stages": {
+    "identify": {
+      "question": "识别一份资料正在谈什么",
+      "inputs": "单条资料与来源信息",
+      "outputs": [
+        "title 字符串",
+        "content_type 字符串",
+        "scope 字符串",
+        "uncertainties 字符串数组"
+      ],
+      "hard_rules": [
+        "标题和来源不足以确定正文时，标出所缺材料。"
+      ]
+    },
+    "extract": {
+      "question": "提炼可以核查的要点",
+      "inputs": "正文、字幕或图片说明与证据编号",
+      "outputs": [
+        "summary 字符串",
+        "points 对象数组，每项含 text 和 evidence_ids"
+      ],
+      "hard_rules": [
+        "引用本轮提供的编号；说明与原文要点之间的关系。"
+      ]
+    },
+    "curate": {
+      "question": "为一组材料提出可读的展览草稿",
+      "inputs": "候选展品、主题和来源编号",
+      "outputs": [
+        "title 字符串",
+        "intro 字符串",
+        "rooms 对象数组，每项含 title、exhibit_ids 和 evidence_ids"
+      ],
+      "hard_rules": [
+        "每件展品只放在一个章节；需要更多材料时返回空 rooms。"
+      ]
+    },
+    "limits": {
+      "question": "列出阅读或解释的边界",
+      "inputs": "资料原文和待核对的解释",
+      "outputs": [
+        "supported 字符串数组",
+        "uncertain 字符串数组",
+        "missing_context 字符串数组"
+      ],
+      "hard_rules": [
+        "区分材料本身不完整和解释超出依据。"
+      ]
+    },
+    "connect": {
+      "question": "比较两份或多份材料",
+      "inputs": "多个收藏及各自的证据",
+      "outputs": [
+        "connections 对象数组，每项含 text、evidence_ids 和 kind"
+      ],
+      "hard_rules": [
+        "kind 使用 agreement、contrast 或 complement；每条连接至少引用两份不同材料。"
+      ]
+    },
+    "exhibition_pass": {
+      "question": "给已有展览草稿整理一段观展路线",
+      "inputs": "已有展览和各章内容",
+      "outputs": [
+        "opening 字符串",
+        "route 对象数组，每项含 room_id 和 reason",
+        "closing_question 字符串"
+      ],
+      "hard_rules": [
+        "沿草稿已有房间顺序；只使用其中已经存在的房间编号。"
+      ]
+    }
+  }
+}

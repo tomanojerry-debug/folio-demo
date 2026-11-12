@@ -1,0 +1,20 @@
+[Unit]
+Description=Folio Demo web preview
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=folio-demo
+Group=folio-demo
+WorkingDirectory=/opt/folio-demo/current
+EnvironmentFile=/etc/folio-demo.env
+ExecStart=/usr/bin/node server/dev.mjs
+Restart=on-failure
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

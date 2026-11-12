@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "web-search",
+  "name": "web-search",
+  "version": "1.0.0",
+  "description": "Use the configured search tool to find public websites and recent news explicitly requested by the user.",
+  "capabilities": ["search-public-web"],
+  "allowedActions": ["search-web"],
+  "input": {
+    "required": ["query", "recency", "authorization"],
+    "maxQueryCharacters": 320,
+    "recency": ["oneDay", "oneWeek", "oneMonth", "oneYear", "noLimit"],
+    "authorization": "An opaque single-use application capability bound to the exact public query and recency."
+  },
+  "output": {
+    "format": "ranked-search-candidates",
+    "maxCandidates": 30,
+    "required": ["candidates", "skill"],
+    "trust": "untrusted-source-data"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": 6,
+  "source": "front-orthographic-graphite-soft-card",
+  "canvas": { "width": 1254, "height": 1254 },
+  "viewport": { "x": 160, "y": 168, "width": 928, "height": 928 },
+  "bodyBounds": { "x": 177, "y": 187, "width": 892, "height": 889 },
+  "windowBounds": { "x": 264, "y": 284, "width": 718, "height": 540 },
+  "eyeSafeBounds": { "x": 440, "y": 440, "width": 366, "height": 228 },
+  "faceCenter": { "x": 623, "y": 554 },
+  "eyes": [
+    { "name": "left", "cx": 551, "cy": 554, "width": 50, "height": 118, "angle": 0 },
+    { "name": "right", "cx": 695, "cy": 554, "width": 50, "height": 118, "angle": 0 }
+  ],
+  "gaze": { "maximumOffset": 80, "maximumVerticalOffset": 48, "reachBodyScale": 1.5, "responseMs": 110, "returnMs": 180, "idleMs": 0 },
+  "nativeBodyWidth": 27.2,
+  "palette": { "shell": "graphite", "eyeTop": "#fff8eb", "eyeBottom": "#f1e2d0" }
+}

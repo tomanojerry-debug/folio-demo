@@ -1,0 +1,11 @@
+/* The collection, notes and conversation share one fixed product shell. */
+body.workspace-chat-open { overflow:hidden; }
+#workspace-conversation {
+  position: fixed;
+  inset: var(--ws-frame-top) var(--ws-frame-gutter) var(--ws-frame-gutter) calc(var(--ws-frame-gutter) + var(--ws-sidebar));
+  z-index: 30;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+#workspace-conversation[hidden] { display:none!important; }

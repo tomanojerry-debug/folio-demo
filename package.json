@@ -1,0 +1,31 @@
+{
+  "name": "folio-demo",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "desktop": "node desktop/scripts/launch.mjs",
+    "desktop:build": "node desktop/scripts/build.mjs",
+    "desktop:server": "node --env-file-if-exists=.env desktop/server/index.mjs",
+    "dev": "node --env-file-if-exists=.env server/dev.mjs",
+    "worker": "node --env-file-if-exists=.env worker/index.mjs",
+    "test": "NODE_ENV=test node --test tests/*.test.mjs",
+    "eval:harness": "node scripts/eval-harness.mjs",
+    "eval:memory-skills": "node scripts/eval-memory-skills.mjs",
+    "eval:knowledge": "node scripts/eval-knowledge.mjs",
+    "check:knowledge-local": "node scripts/check-knowledge-local-runtime.mjs",
+    "build:conversation-css": "node scripts/build-conversation-css.mjs",
+    "check": "node --check site/prototype/immersive-exhibition/app.js && node --check site/prototype/immersive-exhibition/light-workspace.js && node --check site/prototype/immersive-exhibition/home-dashboard.js && node --check site/prototype/immersive-exhibition/collection-recommendations.js && node --check site/prototype/immersive-exhibition/live-ai.js && node --check site/curator/main.js && node --check site/curator/workspace-chat.js && node --check site/curator/workspace-chat-launch.js && node --check site/curator/workspace-conversation-shell.js && node --check site/curator/workspace-conversation-history.js && node --check site/curator/embedded-conversation.js && node scripts/build-conversation-css.mjs --check && node --check site/curator/chat-launch.js && node --check site/curator/desktop-legacy-bridge.js && node --check site/curator/article-reading.js && node --check site/curator/curation-story.js && node --check site/curator/curation-theme.js && node --check site/curator/exhibition-row-layout.js && node --check site/curator/reading-settings.js && node --check desktop/server/reading.mjs && node --check site/curator/task-view.js && node --check desktop/server/service.mjs && node --check desktop/server/harness/context.mjs && node scripts/check-knowledge.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "3.8.1"
+  },
+  "overrides": {
+    "adm-zip": "0.6.1",
+    "onnxruntime-node": "1.22.0",
+    "sharp": "0.35.5"
+  }
+}

@@ -1,0 +1,31 @@
+export function fault(code, statusCode = 400) {
+  return Object.assign(new Error(code), { code, statusCode });
+}
+export const messages = {
+  INVALID_REQUEST: "提交内容格式不正确。",
+  CONTENT_TOO_LONG: "内容过长，请分成较小的段落提交。",
+  MODEL_NOT_CONFIGURED: "AI 服务尚未配置，请联系展示者。",
+  VISION_NOT_CONFIGURED: "图片理解尚未配置，可以先提交文字。",
+  SERVICE_NOT_CONFIGURED: "真实 AI 服务尚未启用。",
+  QUOTA_NOT_CONFIGURED: "展示额度服务尚未配置。",
+  QUOTA_UNAVAILABLE: "额度服务暂时不可用，请稍后重试。",
+  RATE_LIMITED: "本次展示的调用额度已用完，请稍后再试。",
+  MODEL_RATE_LIMITED: "模型服务繁忙，请稍后重试。",
+  MODEL_PROVIDER_ERROR: "模型服务暂时不可用，请稍后重试。",
+  MODEL_TIMEOUT: "模型响应超时，原始内容和已完成步骤会保留，可以继续处理。",
+  MODEL_OUTPUT_INVALID: "AI 返回的内容未通过结构或来源校验，请重试。",
+  FETCH_FAILED: "暂时无法读取这个网页，请粘贴正文或文字稿。",
+  UNSAFE_URL: "请使用可公开访问的 HTTP 或 HTTPS 链接。",
+  WORKER_NOT_CONFIGURED: "视频采集服务尚未连接，请先粘贴文字稿。",
+  WORKER_UNAVAILABLE: "视频采集服务暂时不可用，请稍后重试或粘贴文字稿。",
+  YOUTUBE_NOT_READY: "当前采集服务器无法访问 YouTube，请先粘贴视频文字稿。",
+  XHS_NOT_READY: "小红书采集端尚未接通，请先粘贴笔记正文或提交图片。",
+  AUTH_REQUIRED: "采集端需要登录小红书，请联系展示者，或粘贴正文。",
+  NEEDS_INPUT: "没有取得足够正文或字幕，请补充文字稿。",
+  INSUFFICIENT_ITEMS: "请先添加至少 6 条已完成 AI 理解的真实收藏。",
+  RECEIPT_INVALID: "这条结果的校验凭证无效或已过期，请重新处理。",
+  REQUEST_EXPIRED: "会话已过期，请刷新页面后重试。",
+  REQUEST_RUNNING: "这项任务仍在处理，请稍后继续查看。",
+  BODY_TOO_LARGE: "内容或图片过大，请缩小后重试。",
+  PROCESSING_TIMEOUT: "处理时间较长，本次已停止。请稍后重试。",
+};

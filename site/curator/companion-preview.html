@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Tag · 展窗卡</title>
+  <meta name="description" content="上下左右移动鼠标，认识 Folio 的展窗卡伙伴 Tag。">
+  <link rel="icon" type="image/svg+xml" href="./ink-avatar.svg">
+  <link rel="stylesheet" href="./companion-avatar.css">
+  <style>
+    :root { font: 15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif; color:#302d29; background:#f5f0e8; font-synthesis:none; }
+    * { box-sizing:border-box; }
+    body { margin:0; }
+    button,input { font:inherit; }
+    button { touch-action:manipulation; }
+    a { color:inherit; text-decoration:none; }
+    main { width:min(980px,100%); margin:auto; padding:30px 36px 25px; }
+    .preview-top { display:flex; justify-content:space-between; align-items:center; gap:24px; padding-bottom:18px; border-bottom:1px solid #302d2917; font-size:12px; color:#8a8176; }
+    .preview-brand { display:inline-flex; align-items:center; gap:9px; color:#403a32; font-weight:600; letter-spacing:.08em; }
+    .preview-brand img { width:22px; height:24px; }
+    .preview-heading { margin:32px 0 24px; text-align:center; }
+    h1 { margin:0; font-size:clamp(25px,4vw,34px); line-height:1.5; letter-spacing:-.03em; font-weight:500; }
+    .preview-heading p { margin:7px 0 0; font-size:13px; color:#8a8176; }
+    .preview-stage { position:relative; display:grid; place-items:center; min-height:360px; border:1px solid #ffffff66; border-radius:24px; background:radial-gradient(ellipse at 48% 8%,#373633,#212322 76%); box-shadow:inset 0 1px 0 #ffffff14,0 12px 36px #3a2b1810; }
+    .preview-companion { width:min(240px,calc(100% - 144px)); height:auto; aspect-ratio:928 / 928; }
+    .preview-companion>img { display:block; width:100%; height:100%; object-fit:contain; }
+    .preview-gaze { display:block; margin:14px 0 0; text-align:center; color:#8a8176; font-size:12px; letter-spacing:.05em; }
+    .preview-zones { position:absolute; inset:0; pointer-events:none; }
+    .preview-zones button { position:absolute; display:grid; place-content:center; width:72px; height:40px; padding:6px; border:1px solid #ffffff20; border-radius:10px; color:#c9c0b4; background:#ffffff08; font-size:12px; cursor:default; pointer-events:auto; }
+    .preview-zones [data-preview-position="up"] { left:50%; top:16px; transform:translateX(-50%); }
+    .preview-zones [data-preview-position="down"] { left:50%; bottom:16px; transform:translateX(-50%); }
+    .preview-zones [data-preview-position="left"] { left:16px; top:40%; transform:translateY(-50%); }
+    .preview-zones [data-preview-position="right"] { right:16px; top:40%; transform:translateY(-50%); }
+    .preview-zones button[data-active="true"] { border-color:#d8bc8a70; color:#f6e8d2; background:#c4a47720; }
+    .preview-zones button:focus-visible,.preview-settings input:focus-visible { outline:2px solid #a17b4d; outline-offset:4px; }
+    .preview-settings { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 24px; margin:24px 0 19px; color:#8a8176; font-size:12px; }
+    .preview-settings label { display:inline-flex; align-items:center; gap:8px; color:#655b4f; }
+    .preview-settings input { accent-color:#80664a; }
+    .preview-sizes { display:flex; align-items:center; justify-content:center; gap:32px; padding:16px 0 4px; border-top:1px solid #302d2917; }
+    .preview-sizes figure { display:flex; align-items:center; gap:10px; margin:0; color:#9b8f80; font-size:11px; }
+    .preview-sizes img { display:block; }
+    @media(max-width:600px) { main{padding:21px 20px}.preview-top{font-size:11px}.preview-top>span{display:none}.preview-heading{margin-top:26px}.preview-stage{min-height:320px}.preview-companion{width:min(220px,calc(100% - 120px));height:auto}.preview-zones button{width:44px;height:36px;padding:4px;font-size:11px}.preview-zones [data-preview-position="up"]{top:12px}.preview-zones [data-preview-position="down"]{bottom:12px}.preview-zones [data-preview-position="left"]{left:8px}.preview-zones [data-preview-position="right"]{right:8px}.preview-settings{margin-top:20px}.preview-sizes{gap:22px} }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important} }
+  </style>
+  <script type="module" src="./companion-avatar.js"></script>
+</head>
+<body>
+  <main data-companion-preview>
+    <header class="preview-top"><a class="preview-brand" href="/prototype/immersive-exhibition/"><img src="./ink-avatar.svg" alt="">Folio<span>·</span>Tag</a><span data-preview-readiness role="status">正在认识 Tag…</span></header>
+    <section class="preview-heading" aria-labelledby="preview-title"><h1 id="preview-title">上下左右移动鼠标</h1><p>Tag 会轻轻看向鼠标所在的位置。</p></section>
+    <section class="preview-stage" aria-label="Tag 展窗卡互动预览">
+      <div class="preview-companion" data-preview-companion role="img" aria-label="Tag，黑色软卡策展伙伴"><img src="./ink-avatar.svg" alt="Tag，石墨黑软卡与两只米白色小眼睛"></div>
+      <div class="preview-zones" aria-label="鼠标观察位置">
+        <button type="button" data-preview-position="up" aria-label="上方观察区">上方</button>
+        <button type="button" data-preview-position="down" aria-label="下方观察区">下方</button>
+        <button type="button" data-preview-position="left" aria-label="左侧观察区">左侧</button>
+        <button type="button" data-preview-position="right" aria-label="右侧观察区">右侧</button>
+      </div>
+    </section>
+    <output class="preview-gaze" data-preview-gaze aria-live="polite">看向中间</output>
+    <footer class="preview-settings"><label><input type="checkbox" data-preview-reduced-motion>减少动态效果</label><span data-preview-motion-hint>跟随鼠标位置，离开窗口后回到中间。</span></footer>
+    <div class="preview-sizes" aria-label="小尺寸静态形象"><figure><img src="./ink-avatar.svg" alt="24像素 Tag" width="24" height="24"><figcaption>24</figcaption></figure><figure><img src="./ink-avatar.svg" alt="30像素 Tag" width="30" height="30"><figcaption>30</figcaption></figure></div>
+  </main>
+</body>
+</html>

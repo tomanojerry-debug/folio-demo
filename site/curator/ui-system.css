@@ -1,0 +1,81 @@
+/* FORME — one neutral desktop palette. The desktop supplies the glass color. */
+@font-face {
+  font-family: "Quicksand";
+  src: url("/prototype/immersive-exhibition/assets/fonts/quicksand-bold-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root :is(.identity-name, .curator-link) strong[data-curator-name], .tag-name {
+  font-family: "Quicksand", var(--ui-font-ui);
+  font-weight: 700;
+}
+
+:root {
+  --ui-font-ui: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --ui-bg: #141517;
+  --ui-surface: #18191c;
+  --ui-surface-raised: #24262b;
+  --ui-text: #ebedef;
+  --ui-muted: #a1a5ad;
+  --ui-faint: #777c85;
+  --ui-border: rgba(255,255,255,.085);
+  --ui-focus: #b4cef3;
+  --ui-primary: #ebedef;
+  --ui-primary-foreground: #17181b;
+  --ui-danger: #e2aaa8;
+  --ui-radius: 8px;
+  --ui-ease: cubic-bezier(.2,.8,.2,1);
+  --ui-fast: 120ms;
+  --ui-enter: 180ms;
+  --ui-exit: 130ms;
+  --forme-font-ui: var(--ui-font-ui);
+  --forme-font-reading: var(--ui-font-ui);
+  font-synthesis: none;
+  color-scheme: dark;
+}
+:where(.btn,.input,.textarea,.dropdown-menu,[data-tooltip]) {
+  --bc-font-sans: var(--ui-font-ui);
+  --bc-background: var(--ui-surface);
+  --bc-foreground: var(--ui-text);
+  --bc-primary: var(--ui-primary);
+  --bc-primary-foreground: var(--ui-primary-foreground);
+  --bc-secondary: #292b30;
+  --bc-secondary-foreground: var(--ui-text);
+  --bc-muted: #222429;
+  --bc-muted-foreground: var(--ui-muted);
+  --bc-accent: #303239;
+  --bc-accent-foreground: #f4f5f6;
+  --bc-popover: #25272c;
+  --bc-popover-foreground: var(--ui-text);
+  --bc-border: rgba(255,255,255,.1);
+  --bc-input: rgba(255,255,255,.13);
+  --bc-ring: var(--ui-focus);
+  --bc-destructive: #ab6969;
+  --bc-radius: var(--ui-radius);
+  font-family: var(--ui-font-ui);
+}
+html[data-presentation="light"] {
+  --body: var(--ui-font-ui);
+  --display: var(--ui-font-ui);
+  --display-cn: var(--ui-font-ui);
+  color-scheme: dark;
+}
+body,button,input,textarea,select { font-family: var(--ui-font-ui); }
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+:where(button,a,input,textarea,select):focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 3px;
+}
+.btn { transition: background-color var(--ui-fast) ease,color var(--ui-fast) ease,border-color var(--ui-fast) ease,transform 100ms var(--ui-ease); }
+.btn:not(:disabled):active { transform: scale(.98); }
+.btn:disabled { cursor: not-allowed; }
+[data-tooltip]::before,[data-tooltip]::after { font-family: var(--ui-font-ui); letter-spacing: 0; }
+::selection { background: #c1d5f43d; color: #fff; }
+@media(prefers-reduced-motion:reduce) {
+  .btn { transition: none !important; }
+  .btn:not(:disabled):active { transform: none; }
+}
+html[data-reduce-motion="true"] .btn { transition: none !important; }
+html[data-reduce-motion="true"] .btn:active { transform: none; }

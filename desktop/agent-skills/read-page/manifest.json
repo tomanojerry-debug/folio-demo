@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "read-page",
+  "name": "read-page",
+  "version": "1.0.0",
+  "description": "Read the page or selection explicitly chosen for the current conversation and report its actual readable scope.",
+  "capabilities": ["read-attached-text", "read-selection", "read-public-page"],
+  "allowedActions": ["read-page", "chat-with-page", "collect-page"],
+  "input": {
+    "required": ["context", "authorization"],
+    "contextFields": ["url", "title", "appName", "attachmentId", "pageRevision", "contextVersion", "browserWindowId", "browserTabId", "browserProfileId", "text", "selection", "contentSource", "textTruncated"],
+    "maxTextCharacters": 40000,
+    "maxSelectionCharacters": 12000,
+    "storedSnapshotMetadata": ["snapshotId", "readAt", "originalContentSource"],
+    "authorization": "An opaque capability minted by the application after validating a user action, bound to the exact page input."
+  },
+  "output": {
+    "format": "page-context",
+    "maxTextCharacters": 40000,
+    "maxSelectionCharacters": 12000,
+    "required": ["readStatus", "contentQuality", "skill"],
+    "trust": "untrusted-source-data"
+  }
+}

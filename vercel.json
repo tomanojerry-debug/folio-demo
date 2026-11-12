@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "outputDirectory": "site",
+  "functions": {
+    "api/forme.mjs": {
+      "maxDuration": 180,
+      "includeFiles": "server/prompts/**"
+    }
+  }
+}

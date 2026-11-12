@@ -1,0 +1,1479 @@
+[
+  {
+    "id": "agent-memory",
+    "title": "智能体如何记住",
+    "subtitle": "从 Smallville 的观察日志到可维护的跨会话记忆",
+    "themeTitle": "智能体记忆架构",
+    "openQuestion": "当一段经历进入长期记忆，系统如何判断它仍然有效，又如何让使用者追溯和修正它？",
+    "sections": [
+      {
+        "title": "经验如何进入下一步行动",
+        "introduction": "先从一个会传递消息的小镇看起。三篇文章依次呈现记忆如何影响行为、它在智能体系统中的位置，以及上下文有限时如何调用外部记忆。",
+        "articleIds": [
+          "generative-agents",
+          "llm-autonomous-agents",
+          "memgpt"
+        ]
+      },
+      {
+        "title": "把记忆存下来，也留得住依据",
+        "introduction": "抽取与更新决定什么会进入存储，时效和来源决定记录能否被复核，会话日志则为恢复运行提供另一个层次的依据。",
+        "articleIds": [
+          "mem0",
+          "zep-provenance",
+          "managed-agents"
+        ]
+      },
+      {
+        "title": "为下一次会话整理今天的记忆",
+        "introduction": "压缩当前上下文、后台提炼和跨会话注入各有自己的时机。最后一组从工程方法转向实际产品和完整的记忆分层。",
+        "articleIds": [
+          "effective-context",
+          "sleep-time-compute",
+          "chatgpt-dreaming",
+          "agent-memory-components"
+        ]
+      }
+    ],
+    "articles": [
+      {
+        "id": "generative-agents",
+        "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+        "url": "https://arxiv.org/html/2304.03442",
+        "source": "Joon Sung Park 等 · ACM UIST / arXiv",
+        "publishedAt": "2023-04-07",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "在 Smallville 中，25 个智能体记录观察、形成反思，并检索过去的经历来制订行动计划。",
+        "note": "从图中的城镇和对话入手，观察聚会消息如何沿社交关系传播。记忆流让每个角色能用自己经历过的事件解释下一步行动。",
+        "coverColor": "#426338",
+        "imagePath": "/curator/assets/demo-art/agent-memory-generative-agents.png"
+      },
+      {
+        "id": "llm-autonomous-agents",
+        "title": "LLM Powered Autonomous Agents",
+        "url": "https://lilianweng.github.io/posts/2023-06-23-agent/",
+        "source": "Lilian Weng · Lil’Log",
+        "publishedAt": "2023-06-23",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "从规划、记忆和工具三个方面拆解智能体，比较上下文内的短期记忆与外部存储支持的长期检索。",
+        "note": "把这张总览当作后续阅读的索引。留意记忆在规划与行动之间的作用，以及写入、检索分别发生在哪个环节。",
+        "coverColor": "#635441",
+        "imagePath": "/curator/assets/demo-art/agent-memory-llm-autonomous-agents.png"
+      },
+      {
+        "id": "memgpt",
+        "title": "MemGPT: Towards LLMs as Operating Systems",
+        "url": "https://arxiv.org/html/2310.08560",
+        "source": "Charles Packer 等 · UC Berkeley / arXiv",
+        "publishedAt": "2023-10-12",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "借鉴操作系统的分层存储，通过工具调用在有限的模型上下文与外部记忆之间移动信息。",
+        "note": "图示展示如何把对话历史检索回工作上下文。读时可以把当前提示词看成工作区，再追踪一次外部查找何时触发。",
+        "coverColor": "#394d87",
+        "imagePath": "/curator/assets/demo-art/agent-memory-memgpt.png"
+      },
+      {
+        "id": "mem0",
+        "title": "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory",
+        "url": "https://arxiv.org/html/2504.19413",
+        "source": "Prateek Chhikara 等 · Mem0 / arXiv",
+        "publishedAt": "2025-04-28",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "从会话中提取候选记忆，再与已有记录比较以决定新增、更新、删除或保留。论文还比较了图结构的变体。",
+        "note": "沿架构图从抽取走到更新。适合和 MemGPT 对照，看看由单独的记忆流水线决定存储内容时，责任落在系统的哪个位置。",
+        "coverColor": "#654b87",
+        "imagePath": "/curator/assets/demo-art/agent-memory-mem0.png"
+      },
+      {
+        "id": "zep-provenance",
+        "title": "How Zep tracks provenance in agent memory",
+        "url": "https://www.getzep.com/blog/how-zep-tracks-provenance-in-agent-memory/",
+        "source": "Daniel Chalef · Zep",
+        "publishedAt": "2026-07-14",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "介绍 Graphiti 如何将推导出的事实连回原始事件，并区分事实有效的时间与系统获知它的时间。",
+        "note": "图中的合并和失效说明一条记忆可能来自多个事件。沿着这些连线，可以判断其中一条来源撤回后还有哪些事实有依据。",
+        "coverColor": "#635441",
+        "imagePath": "/curator/assets/demo-art/agent-memory-zep-provenance.png"
+      },
+      {
+        "id": "managed-agents",
+        "title": "Scaling Managed Agents: Decoupling the brain from the hands",
+        "url": "https://www.anthropic.com/research/managed-agents",
+        "source": "Anthropic Engineering",
+        "publishedAt": "2026-04-08",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "用持久事件流记录会话，运行框架再按需读取历史，构建或恢复执行时使用的上下文。",
+        "note": "会话日志保留发生过的事。框架可以随着模型和任务变化，调整从日志中选择和压缩信息的方法。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/agent-memory-managed-agents.png"
+      },
+      {
+        "id": "effective-context",
+        "title": "Effective context engineering for AI agents",
+        "url": "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents",
+        "source": "Anthropic Applied AI",
+        "publishedAt": "2025-09-29",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "从有限上下文出发，介绍按需加载、压缩历史、结构化笔记和子智能体如何支持长任务。",
+        "note": "重点看压缩与笔记的使用时机。比较两者要保留的内容，想象一次任务中断后，接手的智能体究竟需要读到哪些状态。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/agent-memory-effective-context.png"
+      },
+      {
+        "id": "sleep-time-compute",
+        "title": "Sleep-time Compute",
+        "url": "https://www.letta.com/blog/sleep-time-compute/",
+        "source": "Letta Research",
+        "publishedAt": "2025-04-21",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "让后台智能体提前处理上下文，把后续可能需要的信息整理进前台智能体可用的记忆。",
+        "note": "这篇把整理工作移到用户不等待回复的时段。可以把它和前面的即时写入并排阅读，比较两种机制各自增加的计算开销。",
+        "coverColor": "#394d87",
+        "imagePath": "/curator/assets/demo-art/agent-memory-sleep-time-compute.png"
+      },
+      {
+        "id": "chatgpt-dreaming",
+        "title": "Dreaming: Better memory for a more helpful ChatGPT",
+        "url": "https://openai.com/index/chatgpt-memory-dreaming/",
+        "source": "OpenAI",
+        "publishedAt": "2026-06-04",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "介绍 ChatGPT 如何在后台综合多轮交互，以及用户如何在记忆摘要中查看和修正结果。",
+        "note": "对读旅行规划示例中的两个回答，找出历史偏好影响了哪些建议。记忆摘要让用户能发现并纠正影响后续回答的信息。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/agent-memory-chatgpt-dreaming.png"
+      },
+      {
+        "id": "agent-memory-components",
+        "title": "The components of agent memory",
+        "url": "https://www.anthropic.com/research/components-of-agent-memory",
+        "source": "Anthropic Engineering",
+        "publishedAt": "2026-11-06",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "把跨会话记忆分成事件日志、笔记、组织化表示和启动时注入的上下文，并说明后台整理怎样在各层之间传递信息。",
+        "note": "沿图中的箭头回顾整场阅读。每向上一层都发生了信息选择，底层记录则提供日后复核和重新提炼的依据。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/agent-memory-agent-memory-components.png"
+      }
+    ],
+    "readings": {
+      "plain": {
+        "event": {
+          "text": "把智能体想成一位有随身笔记本的办事员。在 Smallville 模拟中，角色记下观察，回想过去，再决定下一步做什么。MemGPT 则把这份笔记分成当前工作区和外部存储，需要时再把旧信息找回来。",
+          "articleIds": [
+            "generative-agents",
+            "memgpt"
+          ]
+        },
+        "evidence": {
+          "text": "检查一条记忆时，可以沿着它找到来源。Zep 的文章展示了事实怎样连回原始事件，Anthropic 的会话架构则记录执行过程，让框架在恢复时重新选取所需历史。",
+          "articleIds": [
+            "zep-provenance",
+            "managed-agents"
+          ]
+        },
+        "unknown": {
+          "text": "知道系统会记录或整理信息，还不足以判断它会记对哪一条。可以从 ChatGPT 的记忆摘要观察用户怎样检查和修正结果，或从 Zep 的来源链判断某条事实还有哪些依据。",
+          "articleIds": [
+            "chatgpt-dreaming",
+            "zep-provenance"
+          ]
+        }
+      },
+      "five-ws": {
+        "who": {
+          "text": "Joon Sung Park 等人从多角色模拟研究记忆如何影响行动。Lilian Weng 从工程角度把记忆放在规划和工具旁边，说明它在智能体架构中的位置。",
+          "articleIds": [
+            "generative-agents",
+            "llm-autonomous-agents"
+          ]
+        },
+        "what": {
+          "text": "这组材料讨论三件事：从经历中挑什么写入、从旧记录中找什么回当前上下文，以及事后如何核对记录。Mem0、MemGPT 和 Zep 分别提供了可追踪这三个动作的实例。",
+          "articleIds": [
+            "mem0",
+            "memgpt",
+            "zep-provenance"
+          ]
+        },
+        "when": {
+          "text": "本展以 2023 年的 Smallville 研究为起点。2025 年的 Letta 文章讨论后台整理，2026 年的 Anthropic 文章再把跨会话记忆分成四层。",
+          "articleIds": [
+            "generative-agents",
+            "sleep-time-compute",
+            "agent-memory-components"
+          ]
+        },
+        "where": {
+          "text": "Smallville 的观察和互动发生在模拟小镇。MemGPT 讨论的是另一种位置关系：一部分信息留在模型当前能看到的上下文，更多历史存放在外部。",
+          "articleIds": [
+            "generative-agents",
+            "memgpt"
+          ]
+        },
+        "why": {
+          "text": "长任务往往积累超过当前上下文能容纳的信息。按需加载、历史压缩和结构化笔记可以帮助任务继续执行；后台整理则把一部分工作提前到下一轮交互之前。",
+          "articleIds": [
+            "effective-context",
+            "sleep-time-compute"
+          ]
+        }
+      },
+      "perspectives": {
+        "common": {
+          "text": "这些材料都需要在记录和使用之间做选择。MemGPT 选择何时把历史取回工作区，Mem0 选择哪些候选值得写进存储，Anthropic 的分层架构让后台整理在事件、笔记和组织化表示之间逐层选择。",
+          "articleIds": [
+            "memgpt",
+            "mem0",
+            "agent-memory-components"
+          ]
+        },
+        "differences": {
+          "text": "三种做法保留的东西不同。Mem0 更新提炼后的记忆，Zep 给推导事实保留来源和时间，会话事件流保留运行过程供框架重新构造上下文。它们分别适合讨论写入、复核和恢复。",
+          "articleIds": [
+            "mem0",
+            "zep-provenance",
+            "managed-agents"
+          ]
+        }
+      },
+      "concepts": {
+        "first": {
+          "text": "工作上下文是模型当前可用的信息，外部记忆则存放在上下文之外。MemGPT 让工具在两者之间移动信息。阅读 Lilian Weng 的架构图时，可以观察检索怎样把历史带回规划。",
+          "articleIds": [
+            "memgpt",
+            "llm-autonomous-agents"
+          ]
+        },
+        "second": {
+          "text": "来源追溯记录一条事实由哪些事件支持。有效时间表示事实何时成立，获知时间表示系统何时收到相关信息。Zep 把这两种时间分别记录，便于核对一条旧记忆何时应被更新。",
+          "articleIds": [
+            "zep-provenance"
+          ]
+        },
+        "third": {
+          "text": "后台整理是在当前回复之外处理历史。Letta 让后台智能体提前提炼信息，Anthropic 的四层架构把整理后的信息进一步放入笔记、组织化表示或下次启动时的上下文。",
+          "articleIds": [
+            "sleep-time-compute",
+            "agent-memory-components"
+          ]
+        }
+      },
+      "chinese": {
+        "takeaway": {
+          "text": "设计记忆架构时，可以顺着一次任务问三件事：经历怎样影响下一步行动，哪些历史要取回当前上下文，哪些处理可以移到后台。三种做法分别对应行为、访问和整理。",
+          "articleIds": [
+            "generative-agents",
+            "memgpt",
+            "sleep-time-compute"
+          ]
+        },
+        "evidence": {
+          "text": "Mem0 的写入流水线对照新旧记录，决定新增、更新、删除或保留。Zep 将事实连到原事件，并区分有效时间和获知时间。Anthropic 的事件流保留会话历史，供框架构建或恢复执行上下文。",
+          "articleIds": [
+            "mem0",
+            "zep-provenance",
+            "managed-agents"
+          ]
+        },
+        "context": {
+          "text": "三组例子跨越模拟研究、存储架构和产品实践。适合比较不同方案承担哪项任务。要判断效果，应回到各自的实验条件、产品说明和所存证据。",
+          "articleIds": [
+            "generative-agents",
+            "mem0",
+            "chatgpt-dreaming"
+          ]
+        }
+      },
+      "english": {
+        "takeaway": {
+          "text": "Agent memory involves deciding what to save, what to retrieve, and what to prepare before a later session. Mem0 focuses on writes, MemGPT moves information into a limited working context, and Letta explores background preparation.",
+          "articleIds": [
+            "mem0",
+            "memgpt",
+            "sleep-time-compute"
+          ]
+        },
+        "evidence": {
+          "text": "Smallville illustrates how retrieved experiences can influence the next action. Zep links derived facts to their originating events, while Anthropic’s managed-agent architecture uses a persistent event stream to reconstruct execution context.",
+          "articleIds": [
+            "generative-agents",
+            "zep-provenance",
+            "managed-agents"
+          ]
+        },
+        "context": {
+          "text": "These examples cover simulation, infrastructure, and product behavior. They help identify which layer is responsible for a decision. A direct performance comparison would require a shared task and evaluation.",
+          "articleIds": [
+            "generative-agents",
+            "agent-memory-components",
+            "chatgpt-dreaming"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "impressionism-modern-life",
+    "title": "现代生活如何入画",
+    "subtitle": "从印象派的独立展览出发，沿着河岸、巴黎街区和画家的工作室，追踪十九世纪末的观看方式。",
+    "themeTitle": "印象派与现代生活",
+    "openQuestion": "如果把同一个巴黎日常交给莫奈、德加和卡萨特，他们各自会把什么留在画面里？",
+    "sections": [
+      {
+        "title": "走出画室",
+        "introduction": "从 1874 年的独立展览回到法国风景画的来路，再到莫奈反复描绘的吉维尼池塘，观察户外写生怎样改变画面。",
+        "articleIds": [
+          "impressionism",
+          "french-landscape",
+          "monet"
+        ]
+      },
+      {
+        "title": "在巴黎看见谁",
+        "introduction": "从船上、排练厅和会客室移到照料孩子的家庭空间，比较画家怎样选择人物、角度和距离。",
+        "articleIds": [
+          "manet",
+          "degas",
+          "renoir",
+          "cassatt"
+        ]
+      },
+      {
+        "title": "重新组织颜色与构图",
+        "introduction": "从日本版画的轮廓和取景，到修拉的分色，再到梵高等画家的各自探索，沿着印象派留下的问题继续看。",
+        "articleIds": [
+          "japonisme",
+          "seurat",
+          "post-impressionism"
+        ]
+      }
+    ],
+    "articles": [
+      {
+        "id": "impressionism",
+        "title": "Impressionism: Art and Modernity",
+        "url": "https://www.metmuseum.org/essays/impressionism-art-and-modernity",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/437680/1859178/main-image",
+        "imageCredit": "1872｜阿尔弗雷德·西斯莱《新城桥》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/437680",
+        "description": "从 1874 年的独立展览出发，梳理短笔触、合成颜料、铁路和巴黎改造如何共同进入印象派的画布。",
+        "note": "先看西斯莱画中的桥。现代工程和河上闪动的光同时出现在画面里，为理解印象派的题材与技法提供了一个入口。",
+        "imagePath": "/curator/assets/demo-art/impressionism.jpg",
+        "coverColor": "#30647b"
+      },
+      {
+        "id": "french-landscape",
+        "title": "The Transformation of Landscape Painting in France",
+        "url": "https://www.metmuseum.org/essays/the-transformation-of-landscape-painting-in-france",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/435877/2006313/main-image",
+        "imageCredit": "1882–1885｜保罗·塞尚《圣维克多山与阿尔克河谷高架桥》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/435877",
+        "description": "回顾法国风景画从学院体系中的次要画种，发展为探索户外光线、地方景物和绘画结构的场所。",
+        "note": "将塞尚画中的山与高架桥并读，可以看到风景怎样从观察的对象变成组织色块和形体的机会。",
+        "imagePath": "/curator/assets/demo-art/french-landscape.jpg",
+        "coverColor": "#78591f"
+      },
+      {
+        "id": "monet",
+        "title": "Claude Monet (1840–1926)",
+        "url": "https://www.metmuseum.org/essays/claude-monet-1840-1926",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://openaccess-cdn.clevelandart.org/1960.81/1960.81_web.jpg",
+        "imageCredit": "约 1915–1926｜克洛德·莫奈《睡莲（百子莲）》｜克利夫兰艺术博物馆，开放获取",
+        "imageSourceUrl": "https://www.clevelandart.org/art/1960.81",
+        "description": "从诺曼底的户外写生到干草堆、鲁昂大教堂和吉维尼的睡莲，追踪莫奈如何反复描绘同一景物来观察光线。",
+        "note": "面对配图里没有岸线的池水，可以试着先找倒影，再看画面怎样引导视线在水面来回移动。",
+        "imagePath": "/curator/assets/folio-login-monet.jpg",
+        "coverColor": "#426338"
+      },
+      {
+        "id": "manet",
+        "title": "Édouard Manet (1832–1883)",
+        "url": "https://www.metmuseum.org/essays/edouard-manet-1832-1883",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/436947/2170247/main-image",
+        "imageCredit": "1874｜爱德华·马奈《划船》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/436947",
+        "description": "回顾马奈在官方沙龙与巴黎前卫圈之间的经历，说明现代生活、鲜亮颜色与裁切构图如何进入他的画。",
+        "note": "留意《划船》中被画边截断的船体。马奈把观众的视线拉到船上，画面的亲近感由取景产生。",
+        "imagePath": "/curator/assets/demo-art/manet.jpg",
+        "coverColor": "#28655d"
+      },
+      {
+        "id": "degas",
+        "title": "Edgar Degas (1834–1917): Painting and Drawing",
+        "url": "https://www.metmuseum.org/essays/edgar-degas-1834-1917-painting-and-drawing",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/438817/2007191/main-image",
+        "imageCredit": "1874｜埃德加·德加《舞蹈课》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/438817",
+        "description": "透过剧院、舞蹈排练和咖啡馆题材，观察德加如何借助偏斜取景与人造光表现都市生活中的动作。",
+        "note": "《舞蹈课》把注意力分给排练、休息和等待的不同人物，适合与印象派画中的户外闲暇对照。",
+        "imagePath": "/curator/assets/demo-art/degas.jpg",
+        "coverColor": "#78591f"
+      },
+      {
+        "id": "renoir",
+        "title": "Auguste Renoir (1841–1919)",
+        "url": "https://www.metmuseum.org/essays/auguste-renoir-1841-1919",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2011-05-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/438815/2272388/main-image",
+        "imageCredit": "1878｜皮埃尔-奥古斯特·雷诺阿《夏庞蒂埃夫人与孩子们》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/438815",
+        "description": "从雷诺阿和莫奈在河畔共同写生，读到他依靠肖像委托开展实验、重新研究古典绘画的阶段。",
+        "note": "在夏庞蒂埃夫人的肖像里，家人的姿态、室内陈设和日本艺术收藏共同说明了巴黎家庭如何展示品味。",
+        "imagePath": "/curator/assets/demo-art/renoir.jpg",
+        "coverColor": "#78591f"
+      },
+      {
+        "id": "cassatt",
+        "title": "Mary Stevenson Cassatt (1844–1926)",
+        "url": "https://www.metmuseum.org/essays/mary-stevenson-cassatt-1844-1926",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://openaccess-cdn.clevelandart.org/1920.379/1920.379_web.jpg",
+        "imageCredit": "1901｜玛丽·卡萨特《沐浴之后》（After the Bath）｜克利夫兰艺术博物馆，CC0",
+        "imageSourceUrl": "https://museum.eprisjournal.com/works/111442/",
+        "description": "从卡萨特加入巴黎印象派展览读到她的彩色版画及母子题材，关注居家日常如何成为绘画与版画的主题。",
+        "note": "从配图中俯视的角度、平面化的图案和轮廓线，可以接到下一篇关于日本版画如何影响法国艺术的讨论。",
+        "imagePath": "/curator/assets/demo-art/cassatt.jpg",
+        "coverColor": "#8b3c46"
+      },
+      {
+        "id": "japonisme",
+        "title": "Japonisme",
+        "url": "https://www.metmuseum.org/essays/japonisme",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/37358/134510/main-image",
+        "imageCredit": "1794｜东洲斋写乐《三代大谷鬼次饰奴江户兵卫》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/37358",
+        "description": "梳理十九世纪日本版画流入欧洲的过程，以及法国画家和版画家从中吸收的构图、轮廓和装饰方式。",
+        "note": "留意写乐怎样用轮廓和夸张的手势传达演员的动作。可以回看马奈的截切构图，再比较卡萨特如何处理画面边缘。",
+        "imagePath": "/curator/assets/demo-art/japonisme.jpg",
+        "coverColor": "#8d4e34"
+      },
+      {
+        "id": "seurat",
+        "title": "Georges Seurat (1859–1891) and Neo-Impressionism",
+        "url": "https://www.metmuseum.org/essays/georges-seurat-1859-1891-and-neo-impressionism",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/437658/802352/main-image",
+        "imageCredit": "1884｜乔治·修拉《大碗岛的星期天下午》习作｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/437658",
+        "description": "以 1886 年最后一次印象派展览为转折，解释修拉和西涅克如何利用分色笔触和当时的色彩理论组织画面。",
+        "note": "先近看习作里的各个颜色，再退远看人物和草地如何聚成整体。观看距离也是这套技法的一部分。",
+        "imagePath": "/curator/assets/demo-art/seurat.jpg",
+        "coverColor": "#78591f"
+      },
+      {
+        "id": "post-impressionism",
+        "title": "Post-Impressionism",
+        "url": "https://www.metmuseum.org/essays/post-impressionism",
+        "source": "The Metropolitan Museum of Art",
+        "publishedAt": "2004-10-01",
+        "imageUrl": "https://collectionapi.metmuseum.org/api/collection/v1/iiif/436529/795979/main-image",
+        "imageCredit": "1888–1889｜文森特·梵高《阿尔勒女子》｜大都会艺术博物馆，公共领域",
+        "imageSourceUrl": "https://www.metmuseum.org/art/collection/search/436529",
+        "description": "将修拉、塞尚、梵高、高更和图卢兹-洛特雷克置于同一艺术史视野，比较他们在色彩、结构和表现上的不同方向。",
+        "note": "以梵高的肖像结束。对照前面雷诺阿的人物画，看看色彩如何改变人物带给观众的感受。",
+        "imagePath": "/curator/assets/demo-art/post-impressionism.jpg",
+        "coverColor": "#78591f"
+      }
+    ],
+    "coverArticleId": "monet",
+    "readings": {
+      "plain": {
+        "event": {
+          "text": "从西斯莱画里的桥看起：现代工程和河上的光出现在同一幅画里。再看莫奈反复描绘同一景物，就能体会画家怎样把寻常所见变成关于光线的研究。",
+          "articleIds": [
+            "impressionism",
+            "monet"
+          ]
+        },
+        "evidence": {
+          "text": "把马奈的《划船》与德加的《舞蹈课》并排看。马奈截断船身，把观看者拉到船上。德加让排练、休息和等待同时进入画面，把注意力分给不同人物。",
+          "articleIds": [
+            "manet",
+            "degas"
+          ]
+        },
+        "unknown": {
+          "text": "这些例子呈现了部分画家各自的选择。若想知道一种构图手法如何传播，可以再读日本版画进入欧洲的那一篇，比较作品边缘、轮廓和观看角度。",
+          "articleIds": [
+            "japonisme",
+            "cassatt",
+            "manet"
+          ]
+        }
+      },
+      "five-ws": {
+        "who": {
+          "text": "莫奈反复观察景物和光线，德加画剧院与排练，卡萨特把居家照料画进绘画和版画。这三位画家提供了不同的观看位置。",
+          "articleIds": [
+            "monet",
+            "degas",
+            "cassatt"
+          ]
+        },
+        "what": {
+          "text": "户外光线、铁路、都市改造和室内生活进入画面。画家也调整笔触、取景和色彩组织，改变观众看到这些场景的方式。",
+          "articleIds": [
+            "impressionism",
+            "french-landscape",
+            "degas"
+          ]
+        },
+        "when": {
+          "text": "展览从 1874 年的独立展览讲起，经过 1886 年最后一次印象派展览，再看莫奈约 1915 至 1926 年间的睡莲作品。",
+          "articleIds": [
+            "impressionism",
+            "seurat",
+            "monet"
+          ]
+        },
+        "where": {
+          "text": "展品带我们走过莫奈写生的诺曼底、德加描绘的巴黎剧院和排练厅，以及莫奈后来画睡莲的吉维尼。",
+          "articleIds": [
+            "monet",
+            "degas"
+          ]
+        },
+        "why": {
+          "text": "铁路与巴黎改造提供了可画的新景象，合成颜料和日本版画也带来新的选择。不同的材料与构图使画家能表现各自看重的东西。",
+          "articleIds": [
+            "impressionism",
+            "japonisme"
+          ]
+        }
+      },
+      "perspectives": {
+        "common": {
+          "text": "几篇资料都从熟悉的生活空间出发。雷诺阿借姿态与陈设呈现巴黎家庭的品味，卡萨特把照料孩子的动作放到画面中心。",
+          "articleIds": [
+            "renoir",
+            "cassatt"
+          ]
+        },
+        "differences": {
+          "text": "莫奈通过反复描绘同一景物观察光线，修拉和西涅克则用分色笔触和当时的色彩理论组织画面。前者可沿一组景物比较，后者可通过改变观看距离体会。",
+          "articleIds": [
+            "monet",
+            "seurat"
+          ]
+        }
+      },
+      "concepts": {
+        "first": {
+          "text": "户外写生是在景物现场观察并作画。可沿着法国风景画的变化去读，再看莫奈如何通过反复作画记录光线。",
+          "articleIds": [
+            "french-landscape",
+            "monet"
+          ]
+        },
+        "second": {
+          "text": "裁切构图让人物或物体伸出画面边缘，使观众注意被选中的局部。马奈的《划船》里，被边缘截断的船身让人感觉自己也坐在船上。",
+          "articleIds": [
+            "manet"
+          ]
+        },
+        "third": {
+          "text": "分色笔触把不同颜色分开放在画面上。看修拉的习作时，先近看各处用色，再退远观察人物与草地如何组成整体。",
+          "articleIds": [
+            "seurat"
+          ]
+        }
+      },
+      "chinese": {
+        "takeaway": {
+          "text": "十九世纪法国风景画成为探索户外光线、地方景物与画面结构的场所。1874 年的独立展览把这条线索接到印象派描绘现代生活的方式。",
+          "articleIds": [
+            "french-landscape",
+            "impressionism"
+          ]
+        },
+        "evidence": {
+          "text": "三件作品可以连着看：马奈以截断的船身拉近视角，德加用偏斜取景与人造光表现排练，卡萨特通过俯视角度和轮廓线组织家庭日常。",
+          "articleIds": [
+            "manet",
+            "degas",
+            "cassatt"
+          ]
+        },
+        "context": {
+          "text": "1886 年最后一次印象派展览为理解修拉的分色提供了时间节点。随后可比较塞尚、梵高等人各自的探索，留意他们怎样处理结构、色彩与表现。",
+          "articleIds": [
+            "seurat",
+            "post-impressionism"
+          ]
+        }
+      },
+      "english": {
+        "takeaway": {
+          "text": "The independent exhibition of 1874 is a starting point for seeing how modern life entered French painting. Bridges, railways and changes in Paris supplied subjects, while short brushstrokes and synthetic pigments shaped how those subjects appeared.",
+          "articleIds": [
+            "impressionism"
+          ]
+        },
+        "evidence": {
+          "text": "Manet crops the boat in Boating to bring the viewer close. Degas uses an oblique view and artificial light to follow movement and waiting in rehearsal. Cassatt brings the ordinary work of caring for a child into view from above.",
+          "articleIds": [
+            "manet",
+            "degas",
+            "cassatt"
+          ]
+        },
+        "context": {
+          "text": "The last Impressionist exhibition in 1886 marks a turning point for reading Seurat's divided brushstrokes. The later work grouped under Post-Impressionism offers several directions to compare, especially in its treatment of color, structure and expression.",
+          "articleIds": [
+            "seurat",
+            "post-impressionism"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "patagonia-worn-longer",
+    "title": "Patagonia：一件衣服能穿多久？",
+    "subtitle": "从抓绒原型、Baggies 短裤到雷诺维修中心，追踪衣服在设计、穿着和再制作三个阶段的变化。",
+    "themeTitle": "服装品牌",
+    "openQuestion": "如果一件衣服的设计要持续到它第一次被修补，设计师、维修师和穿着者各自决定什么？",
+    "sections": [
+      {
+        "title": "在衣服出厂前",
+        "introduction": "从抓绒、填充物和防水层的试验读起，再看品牌如何把耐用与可维修性纳入产品评估。",
+        "articleIds": [
+          "patagonia-fleece",
+          "patagonia-micro-puff",
+          "patagonia-strong-finish",
+          "patagonia-quality"
+        ]
+      },
+      {
+        "title": "穿着留下的痕迹",
+        "introduction": "从品牌档案里的 Baggies 短裤，走到一位长途徒步者的粉色补丁，再看牛仔布怎样在日常穿着中形成自己的纹理。",
+        "articleIds": [
+          "patagonia-baggies",
+          "patagonia-pink-baggies",
+          "patagonia-good-jeans"
+        ]
+      },
+      {
+        "title": "缝补、拆解与再制作",
+        "introduction": "走进维修中心之后，视线落在一条难拆的拉链上。最后看裁缝如何把无法修复的整件衣服拆成可用部件。",
+        "articleIds": [
+          "patagonia-fixation",
+          "patagonia-zipper",
+          "patagonia-scraps"
+        ]
+      }
+    ],
+    "articles": [
+      {
+        "id": "patagonia-fleece",
+        "title": "The Story of Fleece",
+        "url": "https://www.patagonia.com/stories/culture/community/the-story-of-fleece/story-91208.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2020-09-07",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Rachel G. Clark 从一件吸水后变重的羊毛衫写起，梳理早期聚酯抓绒、再生聚酯和再生羊毛混纺如何相继进入 Patagonia 的材料实验。",
+        "note": "把原型与后来的混纺版本放在一起读，留意一种材料解决了什么问题，又带来了什么新问题。",
+        "coverColor": "#3e4962",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-fleece.png"
+      },
+      {
+        "id": "patagonia-micro-puff",
+        "title": "It All Adds Up to Nothing: Forging the Micro Puff",
+        "url": "https://www.patagonia.com/stories/culture/design/it-all-adds-up-to-nothing-forging-the-micro-puff/story-71152.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2018-02-28",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Micro Puff 的研发故事从湿羽绒与传统合成填充物的取舍开始，最终落到一套用于稳定 PlumaFill 纤维的间断绗缝方式。",
+        "note": "面料、填充物和针脚要一起设计。观察这里的接缝怎样同时影响蓬松度、保暖与重量。",
+        "coverColor": "#30647b",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-micro-puff.png"
+      },
+      {
+        "id": "patagonia-strong-finish",
+        "title": "A Strong Finish",
+        "url": "https://www.patagonia.com/stories/culture/design/a-strong-finish/story-133800.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2023-03-22",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Archana Ram 走进 Ventura 的研发中心，追踪 Patagonia 团队如何在淘汰主动添加 PFAS 的过程中，重新测试防泼水整理、薄膜和服装表现。",
+        "note": "从一件雪服原型看材料替换的影响，留意实验室试验与户外使用之间如何往返。",
+        "coverColor": "#8b3c46",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-strong-finish.png"
+      },
+      {
+        "id": "patagonia-quality",
+        "title": "Quality Is an Environmental Issue",
+        "url": "https://www.patagonia.com/stories/planet/our-footprint/quality-is-an-environmental-issue/story-93237.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2020-11-04",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Patagonia 介绍其服装质量评分体系，并以羽绒服拉链的改动说明，可维修性怎样在设计阶段变成具体的结构要求。",
+        "note": "先记住文中的拉链问题。最后一章会回到同一个部件，看看拆解时会发生什么。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-quality.png"
+      },
+      {
+        "id": "patagonia-baggies",
+        "title": "Baggies Shorts Throughout the Years",
+        "url": "https://www.patagonia.com/stories/culture/design/baggies-shorts-throughout-the-years/story-71408.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2018-06-01",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "品牌整理三十多年间出现 Baggies 短裤的档案照片，请拍摄者与参与者回忆照片中的冲浪、攀登和漂流片段。",
+        "note": "先通过照片辨认不同的穿着场景，再看下一篇里一条二手短裤走过的路线。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-baggies.png"
+      },
+      {
+        "id": "patagonia-pink-baggies",
+        "title": "My Pink Baggies",
+        "url": "https://www.patagonia.com/stories/culture/worn-wear/my-pink-baggies/story-71348.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2018-05-02",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Laura Johnston 穿着同一条二手粉色短裤走过阿巴拉契亚步道与太平洋山脊步道，后来用一块粉色补丁修好了篝火留下的小洞。",
+        "note": "一块补丁把长距离徒步、二手交易和品牌维修连到同一件衣服上。",
+        "coverColor": "#8b3c46",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-pink-baggies.png"
+      },
+      {
+        "id": "patagonia-good-jeans",
+        "title": "Good Jeans",
+        "url": "https://www.patagonia.com/stories/culture/design/good-jeans/story-101502.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2021-08-18",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "漫画记者 Sarah Mirk 以图文形式介绍选购和保养牛仔裤的细节，也解释了穿着、洗涤与成衣做旧之间的关系。",
+        "note": "牛仔布的褪色把穿着者纳入衣服的形成过程。试着把它和上一张补丁图对照起来。",
+        "coverColor": "#426338",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-good-jeans.png"
+      },
+      {
+        "id": "patagonia-fixation",
+        "title": "Fixation",
+        "url": "https://www.patagonia.com/stories/culture/worn-wear/fixation/story-71115.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2018-02-13",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "文章走访内华达州雷诺的 Patagonia 维修中心，记录维修师如何学习处理不同装备，以及旧衣在维修、二手转售和回收之间怎样流转。",
+        "note": "维修师的判断和零件能否拆换，一起决定一件旧衣还能走多远。",
+        "coverColor": "#8b3c46",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-fixation.png"
+      },
+      {
+        "id": "patagonia-zipper",
+        "title": "Death to the Zipper",
+        "url": "https://www.patagonia.com/stories/culture/worn-wear/death-to-the-zipper/story-94365.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2020-12-07",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Sakeus Bankson 以拉链为切口，讲述多种材料组成的日常零件怎样在提升使用便利性的同时增加维修和回收难度。",
+        "note": "把这篇和《Quality Is an Environmental Issue》一起读，追踪拉链从设计图到拆解台的变化。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-zipper.png"
+      },
+      {
+        "id": "patagonia-scraps",
+        "title": "How We Turn Scraps into New Gear",
+        "url": "https://www.patagonia.com/stories/culture/worn-wear/second-stories/story-74520.html",
+        "source": "Patagonia Stories",
+        "publishedAt": "2019-10-18",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Patagonia 的 ReCrafted 项目把无法修好的旧衣送到洛杉矶的 Suay 缝纫工坊，按布料和颜色分拣、拆解，再把可用裁片缝成新衣。",
+        "note": "展览从制衣实验室走到裁缝工坊。此时可用的材料来自旧衣口袋、袖片和剩下的面料。",
+        "coverColor": "#8b3c46",
+        "imagePath": "/curator/assets/demo-art/patagonia-worn-longer-patagonia-scraps.png"
+      }
+    ],
+    "readings": {
+      "plain": {
+        "event": {
+          "text": "衣服穿得久，和出厂前怎么缝、穿着时怎么保养、坏了以后能不能修都有关系。展览用一条拉链、一块补丁和几片旧布，把这三个阶段串起来。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "evidence": {
+          "text": "一条二手粉色短裤跟着 Laura Johnston 走过两条长途步道。篝火烧出小洞之后，她用粉色补丁把洞补了起来。雷诺维修中心的故事展示了另一条路：旧衣也可能经维修师判断后进入维修、二手转售或回收。",
+          "articleIds": [
+            "patagonia-pink-baggies",
+            "patagonia-fixation"
+          ]
+        },
+        "unknown": {
+          "text": "这些故事展示了某些衣服如何继续被使用。要判断一类产品通常能穿几年，仍需要更广泛的穿着和维修记录。",
+          "articleIds": [
+            "patagonia-pink-baggies",
+            "patagonia-fixation"
+          ]
+        }
+      },
+      "five-ws": {
+        "who": {
+          "text": "Patagonia 的研发团队测试服装材料。长途徒步者 Laura Johnston 记录一条二手短裤的穿着和修补。Suay 工坊的裁缝把旧衣拆成可再用的裁片。",
+          "articleIds": [
+            "patagonia-strong-finish",
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "what": {
+          "text": "材料试验、穿着和拆解分别决定衣服下一步会怎样。Micro Puff 的针脚用来稳定填充纤维，短裤上的破洞能用补丁缝好，无法修好的旧衣也可能变成新的衣料。",
+          "articleIds": [
+            "patagonia-micro-puff",
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "when": {
+          "text": "相关报道发表于不同年份：雷诺维修中心是 2018 年，ReCrafted 工坊是 2019 年，Ventura 的防水材料测试是 2023 年。",
+          "articleIds": [
+            "patagonia-fixation",
+            "patagonia-scraps",
+            "patagonia-strong-finish"
+          ]
+        },
+        "where": {
+          "text": "研发报道走进 Ventura 的研发中心，维修报道来到内华达州雷诺，再制作报道跟随旧衣抵达洛杉矶的 Suay 缝纫工坊。",
+          "articleIds": [
+            "patagonia-strong-finish",
+            "patagonia-fixation",
+            "patagonia-scraps"
+          ]
+        },
+        "why": {
+          "text": "同一个零件可能让衣服穿起来更方便，也让它更难拆开。拉链的故事解释了为什么品牌会在服装质量评分里考虑可维修性。",
+          "articleIds": [
+            "patagonia-zipper",
+            "patagonia-quality"
+          ]
+        }
+      },
+      "perspectives": {
+        "common": {
+          "text": "拉链贯穿两篇材料。服装质量评分把可维修性落实到羽绒服的拉链结构，拆解报道则关注多种材料组成的拉链为何难修、难回收。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-zipper"
+          ]
+        },
+        "differences": {
+          "text": "设计团队关注结构能否改进，维修师关注眼前的零件能否拆换。穿着者还可能选择保留可见的修补痕迹，像 Laura Johnston 那块粉色补丁。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-fixation",
+            "patagonia-pink-baggies"
+          ]
+        }
+      },
+      "concepts": {
+        "first": {
+          "text": "间断绗缝是在部分位置用针脚固定填充物。Micro Puff 的研发用这种结构稳定 PlumaFill 纤维，同时考虑保暖、蓬松度和重量。",
+          "articleIds": [
+            "patagonia-micro-puff"
+          ]
+        },
+        "second": {
+          "text": "可维修性是部件坏了以后能否拆开、修复或替换。拉链由多种材料组成，缝进衣服时的结构会影响日后的拆换。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-zipper",
+            "patagonia-fixation"
+          ]
+        },
+        "third": {
+          "text": "再制作从旧衣上取得材料。ReCrafted 把无法修好的衣服按布料和颜色分拣，拆出可用裁片，再把裁片缝成新衣。",
+          "articleIds": [
+            "patagonia-scraps"
+          ]
+        }
+      },
+      "chinese": {
+        "takeaway": {
+          "text": "Patagonia 的服装案例把使用寿命的问题带到设计台、户外和维修台。质量评分考虑部件能否拆换，穿着者可以修补损伤，无法修好的旧衣也可能提供再制作材料。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "evidence": {
+          "text": "抓绒从吸水后变重的羊毛衫讲到聚酯和再生纤维；Micro Puff 展示针脚如何固定填充物；拉链案例展示部件的材料组合如何影响维修和回收。",
+          "articleIds": [
+            "patagonia-fleece",
+            "patagonia-micro-puff",
+            "patagonia-zipper"
+          ]
+        },
+        "context": {
+          "text": "展览材料来自 Patagonia Stories，提供了品牌的研发、维修与穿着案例。比较不同品牌的使用寿命，还需要独立数据和一致的测量口径。",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-fixation",
+            "patagonia-baggies"
+          ]
+        }
+      },
+      "english": {
+        "takeaway": {
+          "text": "How long a garment stays in use depends partly on decisions made at different stages: whether a component can be replaced, how a wearer repairs damage, and whether usable fabric can be recovered from an unrepairable garment.",
+          "articleIds": [
+            "patagonia-quality",
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "evidence": {
+          "text": "Laura Johnston patched a campfire hole in her secondhand Baggies after wearing them on two long-distance trails. In the ReCrafted project, the Suay sewing studio sorts and takes apart unrepairable clothes and stitches the usable pieces into new garments.",
+          "articleIds": [
+            "patagonia-pink-baggies",
+            "patagonia-scraps"
+          ]
+        },
+        "context": {
+          "text": "Patagonia's Reno repair center illustrates decisions about repair, resale and recycling. The zipper story explains one practical constraint: a convenient component made of several materials can be difficult to repair or recycle. These accounts document specific cases; comparing typical garment lifespans would require broader records.",
+          "articleIds": [
+            "patagonia-fixation",
+            "patagonia-zipper"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "anime-music",
+    "introducedIn": 2,
+    "title": "动画音乐如何讲故事",
+    "subtitle": "从片头《KICK BACK》到《千与千寻》的交响改编，五件作品呈现音乐怎样开启、推进和延续一段故事。",
+    "themeTitle": "动画音乐与叙事",
+    "openQuestion": "当一首曲子离开原来的画面，你听到的是故事留下的记忆，还是演奏带来的新感受？",
+    "sections": [
+      {
+        "title": "片头打开，片尾回望",
+        "introduction": "先听《链锯人》片头怎样预告一集的节奏，再听《葬送的芙莉莲》片尾怎样留住故事里来不及说完的情绪。",
+        "articleIds": [
+          "chainsaw-kick-back",
+          "frieren-anytime-anywhere"
+        ]
+      },
+      {
+        "title": "在故事中改变方向",
+        "introduction": "把耳朵转向《来自深渊》剧场版的剧中配乐。留意一段音乐怎样从展示世界的壮美过渡到下一章的不安。",
+        "articleIds": [
+          "abyss-faith"
+        ]
+      },
+      {
+        "title": "离开画面以后",
+        "introduction": "跟随《星际牛仔》的虚拟合奏和《千与千寻》的交响改编，比较演奏方式怎样改变我们认识一首曲子的途径。",
+        "articleIds": [
+          "bebop-tank",
+          "spirited-away-one-summers-day"
+        ]
+      }
+    ],
+    "articles": [
+      {
+        "id": "chainsaw-kick-back",
+        "title": "《链锯人》片头〈KICK BACK〉",
+        "url": "https://www.billboard-japan.com/special/detail/3721/",
+        "source": "Billboard JAPAN · 米津玄师访谈",
+        "publishedAt": "",
+        "imageCredit": "Folio 原创示例封面",
+        "coverColor": "#8b3c46",
+        "description": "米津玄师为动画写词作曲，常田大希参与编曲。访谈追溯鼓打贝斯风格的样带，并解释米津怎样用调性和段落风格的突变回应导演的要求。",
+        "note": "重听第一段转折，分别留意音高关系和声音质地的变化。两种变化可以在同一个过门里发生。",
+        "imagePath": "/curator/assets/demo-art/anime-music-chainsaw-kick-back.png"
+      },
+      {
+        "id": "frieren-anytime-anywhere",
+        "title": "《葬送的芙莉莲》片尾〈Anytime Anywhere〉",
+        "url": "https://www.thefirsttimes.jp/interview/0000376403/",
+        "source": "THE FIRST TIMES · milet 访谈",
+        "publishedAt": "2024-01-31",
+        "imageCredit": "Folio 原创示例封面",
+        "coverColor": "#8b3c46",
+        "description": "milet 谈到自己怎样从原作出发写片尾曲，以及 Evan Call 的编曲怎样改变她对歌曲成形的想象。文章附有与动画画面剪辑在一起的官方音乐视频。",
+        "note": "先听人声讲述的离别和记忆，再留意伴奏怎样展开。片尾让一集故事的情绪延续到了字幕出现之后。",
+        "imagePath": "/curator/assets/demo-art/anime-music-frieren-anytime-anywhere.png"
+      },
+      {
+        "id": "abyss-faith",
+        "title": "《来自深渊》剧中配乐〈Faith〉",
+        "url": "https://miabyss.com/images/special/001/qa01.pdf",
+        "source": "《来自深渊》动画官网 · Kevin Penkin 问答",
+        "publishedAt": "",
+        "imageCredit": "Folio 原创示例封面",
+        "coverColor": "#394d87",
+        "description": "Kevin Penkin 在官方问答中讲到，他用〈Faith〉连接电视系列和波多尔多篇，让音乐从传达深渊之美逐渐转向厚重、不安的声响。",
+        "note": "先留意安静旋律何时被重音打断，再回到问答中作曲家提到的剧情转场。阅读时可查找曲名 Faith。",
+        "imagePath": "/curator/assets/demo-art/anime-music-abyss-faith.png"
+      },
+      {
+        "id": "bebop-tank",
+        "title": "《星际牛仔》片头〈TANK!〉的虚拟合奏",
+        "url": "https://www.youtube.com/watch?v=2VsgkIE-RHg",
+        "source": "菅野洋子官方频道 · SEATBELTS",
+        "publishedAt": "2020-04-24",
+        "imageCredit": "Folio 原创示例封面",
+        "coverColor": "#8b3c46",
+        "description": "菅野洋子作曲、编曲的动画片头曲，在 2020 年由她和 SEATBELTS 以虚拟合奏重新呈现。这支官方影片也是 Session Starducks 的制作示范。",
+        "note": "留意合奏中反复出现的节奏，再把注意力转向单个乐手，听他们如何接入同一段音乐。",
+        "type": "video",
+        "imagePath": "/curator/assets/demo-art/anime-music-bebop-tank.png"
+      },
+      {
+        "id": "spirited-away-one-summers-day",
+        "title": "《千与千寻》配乐〈One Summer’s Day〉的交响改编",
+        "url": "https://www.deutschegrammophon.com/en/catalogue/products/ocean-memory-joe-hisaishi-14679",
+        "source": "Deutsche Grammophon · 久石让录音发行说明",
+        "publishedAt": "2026-09-18",
+        "imageCredit": "Folio 原创示例封面",
+        "coverColor": "#30647b",
+        "description": "唱片发行说明收录《千与千寻》主题〈One Summer’s Day (The Name of Life)〉的英语版。久石让在伦敦指挥皇家爱乐乐团，录音从简朴的钢琴旋律逐步展开为完整的管弦乐。",
+        "note": "先记住开头的钢琴旋律，再听乐团加入之后它的轮廓如何保留。可以把这个变化与〈TANK!〉从片头走向合奏视频的过程对照。",
+        "imagePath": "/curator/assets/demo-art/anime-music-spirited-away-one-summers-day.png"
+      }
+    ],
+    "coverArticleId": "spirited-away-one-summers-day",
+    "readings": {
+      "plain": {
+        "event": {
+          "text": "《链锯人》的片头先把观众带进一集的节奏，《葬送的芙莉莲》的片尾让情绪在剧情结束后继续停留。音乐所在的位置，改变了它能替故事做什么。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere"
+          ]
+        },
+        "evidence": {
+          "text": "〈Faith〉是很容易听出变化的一例。Kevin Penkin 让它从表现深渊的美，转到预告波多尔多篇的不安，一首曲子里就有一次情绪转场。",
+          "articleIds": [
+            "abyss-faith"
+          ]
+        },
+        "unknown": {
+          "text": "合奏视频和唱片可以直接对照演奏方式。若要判断一段音乐具体改变了哪个角色或场景的感受，还需要回看它在动画里的位置。",
+          "articleIds": [
+            "bebop-tank",
+            "spirited-away-one-summers-day"
+          ]
+        }
+      },
+      "five-ws": {
+        "who": {
+          "text": "米津玄师与常田大希合作制作〈KICK BACK〉，milet 与 Evan Call 合作完成〈Anytime Anywhere〉，Kevin Penkin 为《来自深渊》写剧中配乐。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "what": {
+          "text": "展览从片头曲和片尾曲入手，再通过〈Faith〉听剧中配乐怎样为下一段剧情铺路。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "when": {
+          "text": "〈TANK!〉虚拟合奏发表于 2020 年。milet 的制作访谈发布于 2024 年。收录久石让改编录音的《OCEAN MEMORY》在 2026 年发行。",
+          "articleIds": [
+            "bebop-tank",
+            "frieren-anytime-anywhere",
+            "spirited-away-one-summers-day"
+          ]
+        },
+        "where": {
+          "text": "片头和片尾分别位于动画正片的两端。离开动画之后，久石让与皇家爱乐乐团在伦敦录音，菅野洋子与 SEATBELTS 则把演奏带进了虚拟合奏影片。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "spirited-away-one-summers-day",
+            "bebop-tank"
+          ]
+        },
+        "why": {
+          "text": "米津玄师想用一首开场曲概括作品的反转和起伏。Kevin Penkin 想用配乐连接两个故事阶段，这两个目的决定了各自需要怎样的声音变化。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "abyss-faith"
+          ]
+        }
+      },
+      "perspectives": {
+        "common": {
+          "text": "米津玄师和 milet 都从自己读原作的体验出发。两篇访谈也都呈现了编曲者怎样加入，把创作者的最初构想做成可听见的段落和层次。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere"
+          ]
+        },
+        "differences": {
+          "text": "〈Faith〉的声音转折有明确的剧情指向。〈TANK!〉的虚拟合奏让听众看见演奏者的分工，而久石让的交响改编让熟悉的旋律在新的配器里展开。",
+          "articleIds": [
+            "abyss-faith",
+            "bebop-tank",
+            "spirited-away-one-summers-day"
+          ]
+        }
+      },
+      "concepts": {
+        "first": {
+          "text": "主题曲在固定位置出现，可以先建立观众对一集动画的期待，也可以在正片之后延续感受。本展把片头〈KICK BACK〉和片尾〈Anytime Anywhere〉并排放置。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere"
+          ]
+        },
+        "second": {
+          "text": "剧中配乐写给故事里的具体段落。〈Faith〉从安静走向不安，Kevin Penkin 把这一变化与电视系列通往下一故事篇章的过程联系起来。",
+          "articleIds": [
+            "abyss-faith"
+          ]
+        },
+        "third": {
+          "text": "配器指把旋律、节奏和伴奏分配给不同的乐器或人声。听久石让的版本时，可以从钢琴听起，再注意管弦乐的加入怎样改变同一旋律的分量。",
+          "articleIds": [
+            "spirited-away-one-summers-day"
+          ]
+        }
+      },
+      "chinese": {
+        "takeaway": {
+          "text": "动画音乐可以压缩作品的气质、延长正片结束后的情绪，也能连接故事的两个阶段。比较时先听每首曲子出现在哪里，再听变化发生在哪里。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "evidence": {
+          "text": "米津玄师用调性与曲风的突变组织开场，milet 说 Evan Call 的编曲改写了她对片尾曲的想象，Kevin Penkin 则用声音由轻转重标记剧情过渡。",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "context": {
+          "text": "虚拟合奏和交响唱片展示的是作品离开画面后的演奏版本。可把这些版本与原动画一起听，比较哪些旋律被保留、哪些层次因新演奏而变得明显。",
+          "articleIds": [
+            "bebop-tank",
+            "spirited-away-one-summers-day"
+          ]
+        }
+      },
+      "english": {
+        "takeaway": {
+          "text": "Where a piece appears in an anime shapes what it can do. An opening can introduce the show's rhythm, a closing theme can prolong an emotion, and a cue inside the story can mark a turn.",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "evidence": {
+          "text": "Yonezu describes changes of key and style in KICK BACK. Milet recalls how Evan Call's arrangement altered her conception of Anytime Anywhere. Penkin explains how Faith moves from the beauty of the Abyss toward the unease of the next arc.",
+          "articleIds": [
+            "chainsaw-kick-back",
+            "frieren-anytime-anywhere",
+            "abyss-faith"
+          ]
+        },
+        "context": {
+          "text": "The SEATBELTS virtual session and Hisaishi's orchestral recording invite a second kind of listening. To hear how the music works against the original images, return to the anime and compare the two settings.",
+          "articleIds": [
+            "bebop-tank",
+            "spirited-away-one-summers-day"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "ai-3d-modeling",
+    "introducedIn": 2,
+    "title": "AI 生成的 3D 模型，离可用还差几步？",
+    "subtitle": "从文字和照片生成形体，经过材质、拓扑和骨骼，把模型交给下一道工序。",
+    "themeTitle": "AI 3D 建模",
+    "openQuestion": "如果同一份生成资产要分别用于网页展示、游戏道具和角色动画，你会为每种用途检查哪些指标？",
+    "coverArticleId": "bernini",
+    "sections": [
+      {
+        "title": "从输入到形体",
+        "introduction": "文字适合探索形体候选，参考图为重建提供可见的轮廓和外观。先分清要生成新方案，还是重建图中对象。",
+        "articleIds": [
+          "bernini",
+          "stable-fast-3d"
+        ]
+      },
+      {
+        "title": "形体与材质分开检查",
+        "introduction": "轮廓正确之后，观察材质能否随光线变化，以及开放表面、内部结构和透明属性能否保留下来。",
+        "articleIds": [
+          "hunyuan3d-21",
+          "trellis-2"
+        ]
+      },
+      {
+        "title": "把模型交给下一道工序",
+        "introduction": "同一个模型可能需要控制面数和文件大小，也可能要加骨骼。用道具的减面实测和角色绑定步骤，检查生成结果能否进入目标工具。",
+        "articleIds": [
+          "meshy-remesh",
+          "meshy-rigging"
+        ]
+      }
+    ],
+    "articles": [
+      {
+        "id": "bernini",
+        "title": "Project Bernini: Generative AI 3D Shape Creation",
+        "url": "https://www.research.autodesk.com/projects/project-bernini/",
+        "source": "Autodesk Research",
+        "publishedAt": "",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "Autodesk 的研究原型接受文字、二维图片、草图、体素和点云等输入，生成三维形体候选。项目展示了同一个椅子提示产生的多种形体，并把它们做成 3D 打印样件。",
+        "note": "从 64 把椅子的轮廓和结构差异看同一文本约束下的方案空间。项目页明确将 Bernini 定位为研究原型，打印展示只代表这些样件。",
+        "coverColor": "#654b87",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-bernini.png"
+      },
+      {
+        "id": "stable-fast-3d",
+        "title": "Introducing Stable Fast 3D: Rapid 3D Asset Generation From Single Images",
+        "url": "https://stability.ai/news-updates/introducing-stable-fast-3d",
+        "source": "Stability AI",
+        "publishedAt": "2024-08-01",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "用一张物体图片生成带 UV 展开的网格、材质参数和减少光照烘焙的反照率颜色。官方文章把快速产出用于原型试验和静态道具。",
+        "note": "看清输出同时包括形体、UV 和外观数据。原文的 0.5 秒有特定显卡条件，不能直接视为本机或完整制作流程的耗时。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-stable-fast-3d.png"
+      },
+      {
+        "id": "hunyuan3d-21",
+        "title": "Hunyuan3D 2.1: From Images to High-Fidelity 3D Assets with Production-Ready PBR Material",
+        "url": "https://arxiv.org/html/2506.15442v1",
+        "source": "Tencent Hunyuan · arXiv",
+        "publishedAt": "2025-06-18",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "论文将形体生成和材质合成拆成两个阶段。Hunyuan3D-Paint 为网格生成基础颜色、金属度和粗糙度贴图，并关注不同视角的材质一致性。",
+        "note": "先看图集里的轮廓，再看不同材质在反光和粗糙度上的差别。对照论文的形体与贴图两项评价，判断哪里需要单独返工。",
+        "coverColor": "#30647b",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-hunyuan3d-21.png"
+      },
+      {
+        "id": "trellis-2",
+        "title": "TRELLIS.2: Native and Compact Structured Latents for 3D Generation",
+        "url": "https://microsoft.github.io/TRELLIS.2/",
+        "source": "Microsoft Research",
+        "publishedAt": "2025-12-16",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "从图片生成带 PBR 材质的资产。项目页展示模型对开放表面和内部结构的表达，也演示了基础颜色、粗糙度、金属度和透明度如何在重新打光时发挥作用。",
+        "note": "用重打光示例检查外观是否随光线自然变化。项目页的速度数据注明 H100 和相应分辨率，适合用来了解条件下的权衡。",
+        "coverColor": "#8d4e34",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-trellis-2.png"
+      },
+      {
+        "id": "meshy-remesh",
+        "title": "Simplify a dense model to the face count you choose",
+        "url": "https://www.meshy.ai/developers/cookbook/recipes/simplify-3d-model/",
+        "source": "Serafin Sanchez · Meshy Cookbook",
+        "publishedAt": "2026-09-28",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "用海箱道具演示从高密度图生模型到减面版本的过程。一个实测样本从约 133 万三角面重建到 19,602 个 FBX 面，GLB 导出为 39,181 个三角面。",
+        "note": "对照原模型和线框，检查锁扣、边缘和小突起保留了多少。案例中的减面文件仍由纹理占据大部分体积，面数和下载体积需要分别验收。",
+        "coverColor": "#635441",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-meshy-remesh.png"
+      },
+      {
+        "id": "meshy-rigging",
+        "title": "Auto Rigging: Add Skeletons to 3D Characters",
+        "url": "https://docs.meshy.ai/en/webapp/guides/3d-model/rigging",
+        "source": "Meshy Docs",
+        "publishedAt": "",
+        "imageCredit": "Folio 原创示例封面",
+        "description": "从 AI 生成角色进入动画时，先准备便于识别四肢的 A 字或 T 字姿势，再定位关节并建立骨骼。指南说明了高面数模型、异常体型和自定义骨骼的处理边界。",
+        "note": "把图中的关节标记与模型轮廓对照，确认肩、肘、膝的位置。最后用实际动作检查肢体变形，面部等自定义骨骼可在 Blender 或 Maya 中手工处理。",
+        "coverColor": "#78591f",
+        "imagePath": "/curator/assets/demo-art/ai-3d-modeling-meshy-rigging.png"
+      }
+    ],
+    "readings": {
+      "plain": {
+        "event": {
+          "text": "可以把过程分成三次检查。先从文字或照片得到看得懂的形体，再看换一盏灯后材质是否仍合理，最后看模型能否按目标面数导出或跟随骨骼运动。",
+          "articleIds": [
+            "bernini",
+            "trellis-2",
+            "meshy-rigging"
+          ]
+        },
+        "evidence": {
+          "text": "Stable Fast 3D 的说明分别列出网格、UV 和材质。Meshy 的海箱案例又分别报告面数、纹理和文件体积，这些项目都能逐项核对。",
+          "articleIds": [
+            "stable-fast-3d",
+            "meshy-remesh"
+          ]
+        },
+        "unknown": {
+          "text": "单张图片只展示可见的一面。把模型转一圈，检查原图看不到的背面，再用目标场景测试。海箱的减面结果也只代表这个样本，不能直接套到其他物件。",
+          "articleIds": [
+            "stable-fast-3d",
+            "meshy-remesh"
+          ]
+        }
+      },
+      "five-ws": {
+        "who": {
+          "text": "Autodesk Research 用 Bernini 探索形体候选，腾讯混元团队把形体生成和材质合成分别研究，Meshy 的指南面向需要绑定和导出角色的制作者。",
+          "articleIds": [
+            "bernini",
+            "hunyuan3d-21",
+            "meshy-rigging"
+          ]
+        },
+        "what": {
+          "text": "这些项目产出的东西各有侧重。Bernini 给出形体候选，Stable Fast 3D 提供带 UV 的网格，Hunyuan3D 2.1 把基础颜色、金属度和粗糙度作为独立材质属性。",
+          "articleIds": [
+            "bernini",
+            "stable-fast-3d",
+            "hunyuan3d-21"
+          ]
+        },
+        "when": {
+          "text": "2024 年发布的 Stable Fast 3D 关注快速重建，2025 年的 Hunyuan3D 2.1 进一步讨论生成 PBR 材质，2026 年的海箱案例记录了减面和导出后的实测结果。",
+          "articleIds": [
+            "stable-fast-3d",
+            "hunyuan3d-21",
+            "meshy-remesh"
+          ]
+        },
+        "where": {
+          "text": "Bernini 的椅子样件在 Autodesk 的技术中心打印。屏幕上的道具可以导出为 GLB 或 FBX，绑定后的角色则可进入 Unity 或 Unreal 检查动作。",
+          "articleIds": [
+            "bernini",
+            "meshy-remesh",
+            "meshy-rigging"
+          ]
+        },
+        "why": {
+          "text": "快速生成让早期试错更便宜。进入交付阶段后，材质需要响应目标光线，模型要符合实际文件和动画要求，每一项都影响能否继续使用。",
+          "articleIds": [
+            "stable-fast-3d",
+            "trellis-2",
+            "meshy-remesh"
+          ]
+        }
+      },
+      "perspectives": {
+        "common": {
+          "text": "这些材料都把三维形体视为起点。快速重建关注能不能及时拿到候选，材质模型关注换光后的表现，重拓扑案例关注几何能否适应交付预算。",
+          "articleIds": [
+            "stable-fast-3d",
+            "hunyuan3d-21",
+            "meshy-remesh"
+          ]
+        },
+        "differences": {
+          "text": "Bernini 的多个椅子候选适合发散探索。TRELLIS.2 展示开放表面、内部结构和可重打光材质。角色绑定指南把检查重点移到姿势、关节位置和动作中的变形。",
+          "articleIds": [
+            "bernini",
+            "trellis-2",
+            "meshy-rigging"
+          ]
+        }
+      },
+      "concepts": {
+        "first": {
+          "text": "UV 展开把三维表面映射到平面贴图上。Stable Fast 3D 将它作为网格输出的一部分。检查时可以绕模型旋转，看看贴图在接缝两侧是否连贯。",
+          "articleIds": [
+            "stable-fast-3d"
+          ]
+        },
+        "second": {
+          "text": "PBR 材质把基础颜色、金属度和粗糙度等属性分开记录，渲染器据此计算反光和亮暗。拿同一资产换一组光线，可检查外观是否依赖输入图里烘进去的阴影。",
+          "articleIds": [
+            "hunyuan3d-21",
+            "trellis-2"
+          ]
+        },
+        "third": {
+          "text": "重拓扑调整模型表面的面与边，绑定则用骨骼驱动这些面随关节变形。先检查面流和面数，再通过实际动作验证绑定效果。",
+          "articleIds": [
+            "meshy-remesh",
+            "meshy-rigging"
+          ]
+        }
+      },
+      "chinese": {
+        "takeaway": {
+          "text": "选择 AI 3D 工作流之前先定用途。构思阶段看候选能否给出可辨的形体，静态展示要看几何和材质，角色动画还要验证骨骼和关节变形。",
+          "articleIds": [
+            "bernini",
+            "hunyuan3d-21",
+            "meshy-rigging"
+          ]
+        },
+        "evidence": {
+          "text": "TRELLIS.2 的重打光示例提供材质检查视角。Meshy 的海箱数据可用于对照面数、格式和下载体积，显示 FBX 的四边面与 GLB 的三角面应按各自格式验收。",
+          "articleIds": [
+            "trellis-2",
+            "meshy-remesh"
+          ]
+        },
+        "context": {
+          "text": "生成速度受硬件与分辨率影响，减面目标也只是设定值。采用前可以用自己的素材验证原图不可见区域、纹理体积和目标环境的表现。",
+          "articleIds": [
+            "stable-fast-3d",
+            "trellis-2",
+            "meshy-remesh"
+          ]
+        }
+      },
+      "english": {
+        "takeaway": {
+          "text": "Match the workflow to the intended use. Generate shape options first, inspect material behavior under new lighting, and test how a character deforms before handing it off for animation.",
+          "articleIds": [
+            "bernini",
+            "trellis-2",
+            "meshy-rigging"
+          ]
+        },
+        "evidence": {
+          "text": "Stable Fast 3D describes a mesh with UVs and material parameters from one image. Hunyuan3D 2.1 separates shape and material synthesis. Meshy reports the measured face counts and file sizes of a remeshed chest.",
+          "articleIds": [
+            "stable-fast-3d",
+            "hunyuan3d-21",
+            "meshy-remesh"
+          ]
+        },
+        "context": {
+          "text": "Reported timings depend on hardware and resolution. The chest measurements describe a single asset. Check surface detail, texture size, and the exported file in the intended tool before committing to a pipeline.",
+          "articleIds": [
+            "trellis-2",
+            "meshy-remesh"
+          ]
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>登录 Folio</title>
+  <link rel="icon" type="image/svg+xml" href="/curator/ink-avatar.svg">
+  <link rel="stylesheet" href="/curator/login.css">
+  <script type="module" src="/curator/login.js"></script>
+</head>
+<body>
+  <main class="login-layout">
+    <section class="login-panel" aria-labelledby="login-heading">
+      <header class="login-header">
+        <div class="login-brand">
+          <img src="/curator/ink-avatar.svg" alt="" width="30" height="34">
+          <span>Folio</span>
+        </div>
+        <h1 id="login-heading">登录</h1>
+      </header>
+      <form id="login-form">
+        <div class="login-field">
+          <label for="login-username">账号</label>
+          <input type="email" id="login-username" name="username" autocomplete="off" spellcheck="false" maxlength="128" required>
+        </div>
+        <div class="login-field">
+          <label for="login-password">密码</label>
+          <div class="password-field">
+            <input type="password" id="login-password" name="password" autocomplete="off" maxlength="128" required>
+            <button type="button" class="password-toggle" id="password-toggle" aria-controls="login-password">显示</button>
+          </div>
+        </div>
+        <p class="login-message" id="login-message" role="alert" hidden></p>
+        <button type="submit" class="login-submit" disabled>登录演示账号</button>
+      </form>
+      <p class="login-footnote" id="login-prefill-note" hidden>演示账号和密码已填好。</p>
+      <noscript><p class="login-footnote">请启用 JavaScript 后登录 Folio。</p></noscript>
+    </section>
+  </main>
+</body>
+</html>

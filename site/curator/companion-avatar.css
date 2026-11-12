@@ -1,0 +1,13 @@
+[data-companion-avatar] { display: inline-grid; place-items: center; flex: 0 0 auto; }
+[data-companion-avatar] > [data-companion-artwork] { display: block; width: 100%; height: 100%; overflow: hidden; }
+[data-companion-eyes] { transform-box: view-box; }
+[data-companion-expression="chevrons"] [data-companion-blink] { display: none; }
+[data-companion-expression="chevrons"] [data-companion-chevrons] { display: inline; }
+img.chat-brand-artwork { object-fit: contain; }
+.curator-mark[data-companion-avatar] { width: 31px; height: 35px; }
+.curator-mark[data-companion-avatar] > [data-companion-artwork] { width: 30px; height: 33px; }
+body.is-workspace-chat .chat-header > .curator-mark[data-companion-avatar] { display: grid; }
+@media (prefers-reduced-motion: reduce) {
+  [data-companion-eyes] { transform: translate(0, 0) !important; }
+}
+html[data-reduce-motion="true"] [data-companion-eyes] { transform: translate(0, 0) !important; }

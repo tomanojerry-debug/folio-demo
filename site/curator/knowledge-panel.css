@@ -1,0 +1,150 @@
+/* Knowledge content uses the shared glass shell and Basecoat controls. */
+.forme-knowledge-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.forme-knowledge-actions .btn[data-variant="ghost"] { border-color:transparent; background:transparent; color:var(--ui-muted); box-shadow:none; }
+.forme-knowledge-actions .btn[data-variant="ghost"]:hover { background:var(--ui-surface-raised); color:var(--ui-text); }
+.forme-knowledge-actions .btn[data-variant="outline"] { border-color:var(--glass-line,var(--ui-border)); background:transparent; color:var(--ui-text); box-shadow:none; }
+body dialog.forme-knowledge-dialog,
+html[data-presentation="light"] body dialog.forme-knowledge-dialog { width:min(820px,calc(100vw - 40px)); }
+.forme-knowledge-content { container-type:inline-size; container-name:knowledge-content; color:var(--glass-text,var(--ui-text)); font-size:13px; line-height:1.8; overflow-wrap:anywhere; }
+.forme-knowledge-content :is(h3,p,ul,blockquote) { margin:0; }
+
+/* Explicit variants also work where the older workspace button skin is loaded. */
+.forme-knowledge-dialog .btn.ws-button[data-size="sm"] { min-height:32px; height:32px; padding-inline:10px; border-radius:var(--ui-radius,8px); font-size:12px; }
+.forme-knowledge-dialog .btn.ws-button[data-variant="ghost"] { border-color:transparent; background:transparent; color:var(--glass-muted,var(--ui-muted)); box-shadow:none; }
+.forme-knowledge-dialog .btn.ws-button[data-variant="outline"] { border-color:var(--glass-line,var(--ui-border)); background:transparent; color:var(--glass-text,var(--ui-text)); box-shadow:none; }
+.forme-knowledge-dialog .btn.ws-button:is([data-variant="ghost"],[data-variant="outline"]):hover { background:var(--bc-muted,var(--ui-surface-raised)); color:var(--glass-text,var(--ui-text)); }
+.forme-knowledge-dialog .btn.ws-button[data-variant="primary"] { border-color:var(--ui-primary); background:var(--ui-primary); color:var(--ui-primary-foreground); }
+.forme-knowledge-dialog .btn.ws-button[data-variant="primary"]:hover { background:var(--ui-text); border-color:var(--ui-text); }
+
+.forme-knowledge-search { display:flex; align-items:center; gap:8px; margin:0 0 20px; padding:0; }
+.forme-knowledge-search[hidden] { display:none; }
+.forme-knowledge-search>label:not(.ws-search) { color:var(--glass-muted,var(--ui-muted)); font-size:12px; }
+.forme-knowledge-search>div { display:flex; flex:1; min-width:0; gap:8px; }
+.forme-knowledge-search .ws-search { flex:1; min-width:0; width:auto; height:36px; min-height:36px; margin:0; border-color:var(--glass-line,var(--ui-border)); border-radius:var(--ui-radius,8px); color:var(--glass-faint,var(--ui-faint)); background:transparent; }
+.forme-knowledge-search .ws-search:focus-within { border-color:var(--ui-focus); }
+.forme-knowledge-search .ws-search input.input { flex:1; min-width:0; width:100%; height:auto; min-height:0; padding:0; border:0; border-radius:0; outline:none; background:none; box-shadow:none; color:var(--glass-text,var(--ui-text)); font:13px/1.5 var(--ui-font-ui); }
+.forme-knowledge-search input::placeholder { color:var(--glass-faint,var(--ui-faint)); }
+.forme-knowledge-search>.btn.ws-button[data-size="sm"],
+.forme-knowledge-search>div>.btn.ws-button[data-size="sm"] { height:36px; min-height:36px; padding-inline:14px; }
+
+.forme-knowledge-empty { padding:24px 0; color:var(--glass-muted,var(--ui-muted)); }
+.forme-knowledge-empty small { display:block; margin-top:6px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-status { padding:20px 0; color:var(--glass-muted,var(--ui-muted)); }
+.forme-knowledge-note { color:var(--glass-faint,var(--ui-faint)); font-size:11px; line-height:1.7; }
+.forme-knowledge-content .forme-knowledge-note { margin:0 0 12px; }
+.forme-knowledge-error { padding:12px 0; color:var(--ui-danger); font-size:12px; }
+.forme-knowledge-result { padding:20px 0; border-bottom:1px solid var(--glass-line,var(--ui-border)); }
+.forme-knowledge-result:first-child { padding-top:4px; }
+.forme-knowledge-result:last-child { border-bottom:0; }
+.forme-knowledge-result-head { display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+.forme-knowledge-result-head>* { min-width:0; }
+.forme-knowledge-result-footer { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+.forme-knowledge-content h3 { color:var(--glass-text,var(--ui-text)); font-size:15px; font-weight:500; line-height:1.6; }
+.forme-knowledge-result h3 button { display:inline-flex; align-items:center; gap:6px; max-width:100%; padding:0; border:0; border-radius:2px; background:none; color:inherit; text-align:left; line-height:inherit; cursor:pointer; }
+.forme-knowledge-result h3 button>svg { flex:0 0 14px; width:14px; height:14px; color:var(--glass-faint,var(--ui-faint)); }
+.forme-knowledge-result h3 button span { padding-left:4px; color:var(--glass-faint,var(--ui-faint)); }
+.forme-knowledge-result h3 button:hover { text-decoration:underline; text-underline-offset:4px; }
+.forme-knowledge-source { color:var(--glass-faint,var(--ui-faint)); font-size:11px; font-weight:400; line-height:1.7; overflow-wrap:anywhere; }
+.forme-knowledge-result-head .forme-knowledge-source { margin-top:3px; }
+.forme-knowledge-reasons { display:flex; flex-wrap:wrap; gap:4px 12px; padding:6px 0 0; list-style:none; color:var(--glass-muted,var(--ui-muted)); font-size:11px; }
+.forme-knowledge-content .forme-knowledge-evidence { margin:12px 0 0; }
+.forme-knowledge-evidence>p { margin-bottom:6px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-evidence blockquote { margin:8px 0 0; padding:0 0 0 12px; border-left:1px solid var(--glass-edge,var(--ui-border)); }
+.forme-knowledge-evidence small,.forme-knowledge-chunk small { color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-evidence blockquote p { margin-top:4px; color:var(--glass-muted,var(--ui-muted)); white-space:pre-wrap; font-size:13px; line-height:1.85; }
+
+.forme-knowledge-anchor { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:0 0 16px; padding:0 0 16px; border:0; border-bottom:1px solid var(--glass-line,var(--ui-border)); border-radius:0; background:none; }
+.forme-knowledge-anchor>div { flex:1; min-width:0; }
+.forme-knowledge-anchor>.btn { flex-shrink:0; }
+.forme-knowledge-anchor>p,.forme-knowledge-anchor>div>p,.forme-knowledge-document>header>p:first-child { margin-bottom:4px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-back { margin-bottom:16px; }
+.forme-knowledge-back-icon { display:inline-flex; transform:rotate(180deg); }
+.forme-knowledge-document>header { padding-bottom:16px; border-bottom:1px solid var(--glass-line,var(--ui-border)); }
+.forme-knowledge-document>header .forme-knowledge-note { margin:8px 0 0; }
+.forme-knowledge-chunk { padding:18px 0; }
+.forme-knowledge-chunk p { margin-top:4px; white-space:pre-wrap; font-size:14px; line-height:1.95; }
+.forme-knowledge-reading-text { margin:18px 0; color:var(--glass-text,var(--ui-text)); white-space:pre-wrap; overflow-wrap:anywhere; font-size:14px; line-height:1.95; }
+
+.forme-knowledge-concept-filters { display:flex; flex-wrap:wrap; gap:4px; margin:0 0 16px; }
+.forme-knowledge-concept-filters button { min-height:30px; height:auto; padding:4px 10px; border:0; border-radius:5px; background:transparent; color:var(--glass-muted,var(--ui-muted)); box-shadow:none; font-size:12px; line-height:1.5; cursor:pointer; }
+.forme-knowledge-concept-filters button span { margin-left:4px; color:var(--glass-faint,var(--ui-faint)); font-variant-numeric:tabular-nums; }
+.forme-knowledge-concept-filters button:hover,
+.forme-knowledge-concept-filters button:is([aria-pressed="true"],.is-active) { background:var(--ui-surface-raised); color:var(--glass-text,var(--ui-text)); }
+
+.forme-knowledge-network { margin:0 0 18px; padding:0; border:0; border-radius:0; background:none; }
+.forme-knowledge-network-scroll { max-height:320px; overflow-y:auto; overflow-x:hidden; border:1px solid var(--glass-line,var(--ui-border)); border-radius:var(--ui-radius,8px); scrollbar-width:thin; scrollbar-color:var(--glass-edge) transparent; }
+.forme-knowledge-network svg { display:block; width:100%; min-width:0; height:auto; }
+.forme-knowledge-network text { fill:var(--glass-text,var(--ui-text)); text-anchor:middle; font-size:13px; font-family:var(--ui-font-ui); pointer-events:none; }
+.forme-knowledge-network-lines path { fill:none; stroke:var(--glass-edge,var(--ui-border)); stroke-width:1.2; }
+.forme-knowledge-network-article rect,
+.forme-knowledge-network-concept rect,
+.forme-knowledge-network-topic rect { fill:var(--glass-reading,var(--ui-surface)); stroke:var(--glass-edge,var(--ui-border)); }
+.forme-knowledge-network-article.is-anchor rect { fill:var(--ui-surface-raised); stroke:var(--glass-muted,var(--ui-muted)); }
+.forme-knowledge-network-article .forme-knowledge-network-kind { fill:var(--glass-faint,var(--ui-faint)); font-size:10px; letter-spacing:0; }
+.forme-knowledge-network-concept text,
+.forme-knowledge-network-topic text { fill:var(--glass-muted,var(--ui-muted)); font-size:12px; }
+.forme-knowledge-network a { cursor:pointer; }
+.forme-knowledge-network a:hover rect,
+.forme-knowledge-network-concept.is-selected rect { stroke:var(--glass-text,var(--ui-text)); }
+.forme-knowledge-network a:focus-visible rect { stroke:var(--ui-focus); }
+.forme-knowledge-network figcaption { margin-top:8px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-network-hint { display:none; }
+
+/* Narrow panels use the same nodes as a static, wrapping tree. */
+.forme-knowledge-network-compact { display:none; margin:0 0 18px; min-width:0; }
+.forme-knowledge-network-compact>div,
+.forme-knowledge-network-root { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--glass-line,var(--ui-border)); border-radius:var(--ui-radius,8px); background:var(--ui-surface-raised); color:var(--glass-text,var(--ui-text)); font-size:13px; line-height:1.65; }
+.forme-knowledge-network-root>svg { flex:0 0 15px; width:15px; height:15px; color:var(--glass-faint,var(--ui-faint)); }
+.forme-knowledge-network-root>span { flex:1; min-width:0; }
+.forme-knowledge-network-compact strong { font-weight:500; }
+.forme-knowledge-network-compact ul { margin:10px 0 0; padding:0 0 0 16px; border-left:1px solid var(--glass-line,var(--ui-border)); list-style:none; }
+.forme-knowledge-network-compact li { position:relative; min-width:0; padding:0 0 12px 12px; }
+.forme-knowledge-network-compact li:last-child { padding-bottom:0; }
+.forme-knowledge-network-compact li::before { content:""; position:absolute; top:16px; left:-16px; width:16px; border-top:1px solid var(--glass-line,var(--ui-border)); }
+.forme-knowledge-dialog .forme-knowledge-network-compact .btn[data-size],
+.forme-knowledge-network-compact .forme-knowledge-network-node { display:flex; justify-content:flex-start; width:100%; max-width:100%; min-height:32px; height:auto; padding:6px 10px; white-space:normal; text-align:left; overflow-wrap:anywhere; font-size:12px; line-height:1.65; }
+.forme-knowledge-network-node>svg { flex:0 0 14px; width:14px; height:14px; margin-left:auto; }
+.forme-knowledge-network-compact small,
+.forme-knowledge-network-compact li>span,
+.forme-knowledge-network-compact li>p { display:block; margin-bottom:4px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+
+.forme-knowledge-connection-count { margin-bottom:4px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-connections { margin:0; padding:0; list-style:none; }
+.forme-knowledge-connections>li { border-bottom:1px solid var(--glass-line,var(--ui-border)); }
+.forme-knowledge-connections>li:last-child { border-bottom:0; }
+.forme-knowledge-connection { border-bottom:0; }
+.forme-knowledge-connection .forme-knowledge-relation-type { margin-bottom:4px; color:var(--glass-faint,var(--ui-faint)); font-size:11px; }
+.forme-knowledge-comparison { margin-top:12px; }
+.forme-knowledge-comparison>summary { display:inline-flex; align-items:center; gap:6px; width:fit-content; min-height:30px; border-radius:3px; color:var(--glass-muted,var(--ui-muted)); font-size:12px; list-style:none; cursor:pointer; }
+.forme-knowledge-comparison>summary::-webkit-details-marker { display:none; }
+.forme-knowledge-comparison>summary::marker { content:""; }
+.forme-knowledge-comparison>summary>svg { flex:0 0 14px; width:14px; height:14px; color:var(--glass-faint,var(--ui-faint)); transition:transform var(--ui-fast,120ms) ease; }
+.forme-knowledge-comparison[open]>summary>svg { transform:rotate(180deg); }
+.forme-knowledge-comparison>summary:hover { color:var(--glass-text,var(--ui-text)); }
+.forme-knowledge-comparison[open]>summary { margin-bottom:14px; }
+.forme-knowledge-connection-pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; margin:14px 0; }
+.forme-knowledge-connection-proof { min-width:0; padding:0; border:0; border-radius:0; background:none; }
+.forme-knowledge-connection-proof h4 { margin:0; color:var(--glass-muted,var(--ui-muted)); font-size:12px; font-weight:500; line-height:1.65; }
+.forme-knowledge-connection-proof .forme-knowledge-evidence { margin:8px 0 12px; }
+.forme-knowledge-connection-proof .forme-knowledge-evidence>p { font-size:11px; }
+.forme-knowledge-connection-proof .forme-knowledge-evidence blockquote p { font-size:13px; }
+.forme-knowledge-dialog :is(button,input,a,summary,[tabindex]):focus-visible { outline:2px solid var(--ui-focus); outline-offset:3px; }
+
+@container knowledge-content (max-width:600px) {
+  .forme-knowledge-network-scroll { display:none; }
+  .forme-knowledge-network-compact { display:block; }
+  .forme-knowledge-connection-pair { grid-template-columns:minmax(0,1fr); gap:18px; }
+}
+@media (max-width:760px) {
+  .forme-knowledge-network-scroll { display:none; }
+  .forme-knowledge-network-compact { display:block; }
+  .forme-knowledge-connection-pair { grid-template-columns:minmax(0,1fr); gap:18px; }
+  .forme-knowledge-anchor { align-items:flex-start; gap:12px; }
+  .forme-knowledge-result { padding-block:18px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .forme-knowledge-dialog :is(button,input,a,summary),.forme-knowledge-comparison>summary>svg,.forme-knowledge-network-scroll { transition:none !important; scroll-behavior:auto; }
+}
+html[data-reduce-motion="true"] .forme-knowledge-dialog :is(button,input,a,summary),
+html[data-reduce-motion="true"] .forme-knowledge-comparison>summary>svg,
+html[data-reduce-motion="true"] .forme-knowledge-network-scroll { transition:none !important; scroll-behavior:auto; }

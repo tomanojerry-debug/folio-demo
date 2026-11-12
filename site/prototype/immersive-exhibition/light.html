@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN" data-presentation="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Folio：和 Tag 一起收藏、思考，把散落的兴趣组织成自己的展览。" />
+    <title>Folio · 私人收藏馆</title>
+    <link rel="icon" type="image/svg+xml" href="/curator/ink-avatar.svg" />
+    <link rel="stylesheet" href="/vendor/basecoat/basecoat-scoped.css" />
+    <link rel="stylesheet" href="./styles.css?v=20261004-capture-1" />
+    <link rel="stylesheet" href="./live-ai.css?v=20261004-3" />
+    <link rel="stylesheet" href="./light.css?v=20261109-graphite-1" />
+    <link rel="stylesheet" href="./light-workspace.css?v=20261111-cover-colors" />
+    <link rel="stylesheet" href="/curator/companion-avatar.css" />
+    <link rel="stylesheet" href="/curator/ui-system.css?v=20261111-name-font" />
+    <link rel="stylesheet" href="/curator/task-progress.css" />
+    <link rel="stylesheet" href="/curator/glass-dialogs.css?v=20261110" />
+    <link rel="stylesheet" href="/curator/article-reading.css" />
+    <link rel="stylesheet" href="/curator/curation-story.css?v=20261112-topic-auto-reading" />
+    <link rel="stylesheet" href="/curator/reading-settings.css" />
+    <link rel="stylesheet" href="/curator/workspace-conversation-history.css" />
+    <link rel="stylesheet" href="/curator/workspace-conversation-shell.css" />
+    <script defer src="/vendor/basecoat/js/basecoat.min.js"></script>
+    <script defer src="/vendor/basecoat/js/dropdown-menu.min.js"></script>
+  </head>
+  <body class="app-booting">
+    <a class="ws-skip" href="#app">跳到内容</a>
+    <div class="ws-frame">
+      <aside class="ws-sidebar" aria-label="私人空间">
+        <a class="ws-brand" href="#top" data-nav="home" aria-label="Folio · 私人收藏馆首页">
+          <span class="ws-brand-companion" aria-hidden="true"><img src="/curator/ink-avatar.svg" alt="" width="32" height="32"></span>
+          <strong>Folio</strong>
+        </a>
+        <nav class="ws-nav" aria-label="产品空间" data-workspace-nav></nav>
+        <section class="ws-conversation-history" data-workspace-conversations aria-label="和 Tag 的对话"></section>
+        <div class="ws-sidebar-footer">
+          <button type="button" class="btn ws-button" data-variant="ghost" data-size="sm" data-workspace-settings aria-haspopup="dialog" aria-label="设置"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h4m4 0h6M3 10h8m4 0h2M3 15h2m4 0h8"/><circle cx="9" cy="5" r="2"/><circle cx="13" cy="10" r="2"/><circle cx="7" cy="15" r="2"/></svg><span>设置</span></button>
+          <button type="button" class="btn ws-icon-button" data-variant="ghost" data-size="icon-sm" aria-label="退出演示" data-tooltip="退出演示" data-side="top" data-demo-logout hidden><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4v12h4m2-6h7m-3-3 3 3-3 3"/></svg></button>
+          <button class="btn ws-icon-button" data-variant="ghost" data-size="icon-sm" type="button" data-workspace-action="help" aria-label="键盘快捷键" aria-haspopup="dialog" data-tooltip="键盘快捷键" data-side="top" data-align="end">?</button>
+        </div>
+      </aside>
+      <main id="app" tabindex="-1"></main>
+      <section id="workspace-conversation" data-workspace-conversation-host data-chat-controller aria-label="和 Tag 对话" tabindex="-1" hidden></section>
+    </div>
+    <div class="ws-announcement sr-only" role="status" aria-live="polite" data-workspace-announcement></div>
+    <dialog class="ws-help" data-workspace-help aria-labelledby="ws-help-title"><header><h2 id="ws-help-title">快捷键</h2><button class="btn ws-icon-button" data-variant="ghost" data-size="icon-sm" type="button" data-workspace-action="close-help" aria-label="关闭快捷键说明">×</button></header><p>当前窗口的常用操作。</p><dl><div><dt>搜索当前页面</dt><dd><kbd>⌘</kbd><kbd>K</kbd></dd></div><div><dt>收一条新内容</dt><dd><kbd>⌘</kbd><kbd>⇧</kbd><kbd>N</kbd></dd></div><div><dt>收起弹窗</dt><dd><kbd>退出键</kbd></dd></div></dl><footer>也可以直接点击搜索框与「收新」按钮。</footer></dialog>
+    <noscript>请允许页面运行，以打开收藏、展览与手记。</noscript>
+    <script src="/curator/desktop-legacy-bridge.js" type="module"></script>
+  </body>
+</html>

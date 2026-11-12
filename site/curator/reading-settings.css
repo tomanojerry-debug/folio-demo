@@ -1,0 +1,76 @@
+html[data-presentation="light"] body dialog.forme-reading-settings-dialog { width:min(620px,calc(100vw - 32px)); }
+.forme-reading-settings-body { color:var(--ui-text,#ebedef); font-family:var(--ui-font-ui,sans-serif); }
+.forme-reading-settings-body fieldset { min-width:0; padding:0; margin:0; border:0; }
+.forme-reading-settings-section + .forme-reading-settings-section { margin-top:25px; padding-top:23px; border-top:1px solid var(--ui-border,#ffffff15); }
+.forme-reading-settings-section h3 { margin:0 0 8px; font-size:14px; font-weight:500; }
+.forme-reading-settings-section > p { margin:0 0 16px; color:var(--ui-muted,#a1a5ad); font-size:12px; line-height:1.75; }
+.forme-reading-settings-section label:not(.forme-reading-settings-mode) { display:block; margin:0 0 9px; color:var(--ui-muted); font-size:12px; }
+.forme-reading-settings-modes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.forme-reading-settings-mode { display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid transparent; border-radius:var(--ui-radius,8px); background:transparent; cursor:pointer; }
+.forme-reading-settings-mode:hover { background:#ffffff03; }
+.forme-reading-settings-mode:has(input:checked) { border-color:transparent; background:#ffffff05; }
+.forme-reading-settings-mode input { width:14px; height:14px; margin:3px 0 0; flex:none; appearance:auto; accent-color:var(--ui-primary,#ebedef); }
+.forme-reading-settings-mode > span { display:grid; gap:5px; }
+.forme-reading-settings-mode b { font-size:12px; font-weight:500; }
+.forme-reading-settings-mode small { font-size:11px; color:var(--ui-muted); line-height:1.6; }
+.forme-reading-settings-body .forme-reading-settings-hint { margin:10px 0 0; color:var(--ui-muted); font-size:11px; line-height:1.8; }
+.forme-reading-settings-display { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:17px; }
+.forme-reading-settings-sample { margin-top:20px; padding:16px; border-left:2px solid var(--ui-border,#ffffff15); color:var(--ui-muted); }
+.forme-reading-settings-sample p { max-width:var(--settings-reading-width,26em); font-size:var(--settings-font-size,17px); line-height:1.8; margin:0; }
+.forme-reading-settings-actions { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:25px; padding-top:18px; border-top:1px solid var(--ui-border,#ffffff15); }
+.forme-reading-settings-actions > div { display:flex; gap:8px; }
+.forme-reading-settings-status { color:var(--ui-muted,#a1a5ad); font-size:12px; line-height:1.75; margin:16px 0 0; }
+.forme-reading-settings-error { color:var(--ui-danger,#e2aaa8); font-size:12px; line-height:1.75; margin:16px 0 0; }
+
+/* Keep the existing Basecoat buttons, fields and native selects. The shared
+   glass outline and Basecoat ring must not stack around these small controls. */
+body dialog.forme-reading-settings-dialog :is(.btn,.input,.textarea,input[type="radio"]) { box-shadow:none; }
+body dialog.forme-reading-settings-dialog :is(button,a,input,textarea,select):focus { box-shadow:none; }
+body dialog.forme-reading-settings-dialog :is(button,a,input,textarea,select):focus:not(:focus-visible) { outline:none; }
+body dialog.forme-reading-settings-dialog :is(button,a):focus-visible { outline:1px solid var(--ui-focus,#b4cef3); outline-offset:2px; box-shadow:none; }
+body dialog.forme-reading-settings-dialog :is(.input,.textarea) { border-color:var(--ui-border,#ffffff15); }
+body dialog.forme-reading-settings-dialog :is(.input,.textarea):focus-visible { border-color:#b4cef399; outline:none; box-shadow:none; }
+body dialog.forme-reading-settings-dialog input[type="radio"]:focus-visible { outline:1px solid var(--ui-focus,#b4cef3); outline-offset:3px; box-shadow:none; }
+.forme-reading-settings-select { position:relative; }
+.forme-reading-settings-select::after {
+  content:"";
+  position:absolute;
+  inset-inline-end:14px;
+  inset-block-start:50%;
+  width:7px;
+  height:7px;
+  border-right:1.5px solid var(--ui-muted,#a1a5ad);
+  border-bottom:1.5px solid var(--ui-muted,#a1a5ad);
+  transform:translateY(-70%) rotate(45deg);
+  pointer-events:none;
+}
+body dialog.forme-reading-settings-dialog .forme-reading-settings-select > select {
+  appearance:none;
+  display:block;
+  width:100%;
+  min-height:38px;
+  padding-block:7px;
+  padding-inline:12px 34px;
+  border:1px solid var(--ui-border-strong,#ffffff29);
+  border-radius:var(--ui-radius,8px);
+  background:var(--ui-surface,#18191c);
+  color:var(--ui-text,#ebedef);
+  color-scheme:dark;
+  font:inherit;
+  font-size:13px;
+  cursor:pointer;
+}
+body dialog.forme-reading-settings-dialog .forme-reading-settings-select > select:not(:disabled):hover {
+  background:var(--ui-surface-raised,#24262b);
+}
+body dialog.forme-reading-settings-dialog .forme-reading-settings-select > select:focus-visible {
+  outline:1px solid var(--ui-focus,#b4cef3);
+  outline-offset:2px;
+}
+body dialog.forme-reading-settings-dialog .forme-reading-settings-select > select:disabled { cursor:default; }
+@media(forced-colors:active) {
+  body dialog.forme-reading-settings-dialog :is(button,a,input,textarea,select):focus-visible { border-color:Highlight; outline:1px solid Highlight; outline-offset:2px; }
+  body dialog.forme-reading-settings-dialog .forme-reading-settings-select > select { appearance:auto; padding-inline-end:12px; }
+  .forme-reading-settings-select::after { display:none; }
+}
+@media(max-width:480px) { .forme-reading-settings-modes { grid-template-columns:1fr; }.forme-reading-settings-mode { padding:10px 12px; } }
