@@ -40,6 +40,10 @@ npm run desktop -- --personal --setup-model
 
 首次启动会从源码编译 Folio。按页面提示填写支持 Chat Completions 的 API 地址、模型名称和自己的 API Key。连接成功后即可和 Tag 对话。Key 保存在仅本机用户可读取的配置文件中。模型问答会把相关内容发送给你选择的模型服务。
 
+如果不确定 API 地址和模型名，可以把下面这段交给常用的 Coding Agent。
+
+> 请帮我确认如何在 Folio 接入我指定的模型。告诉我兼容 Chat Completions 的 API 地址和准确的模型名。API Key 由我本人在这台 Mac 的 Folio 设置页填写。请勿索取、读取或传输 Key，也不要把它写入聊天、代码、日志或 GitHub。
+
 只想浏览示例时，从 Folio 菜单退出后运行 `npm run desktop`。演示馆包含预置收藏和展览，无需模型，数据写入 `.data/folio-demo/`。
 
 开发者也可通过 `npm run desktop -- --personal` 使用本地 `.env` 配置。源码启动的个人收藏、对话和笔记保存在 `.data/desktop/`。默认本机语义索引会在首次使用时下载公开模型，可在 `.env` 中设置 `KNOWLEDGE_EMBEDDING_BACKEND=disabled` 使用全文检索。
