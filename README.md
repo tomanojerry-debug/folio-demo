@@ -6,6 +6,8 @@ Folio 把散落的链接和文字整理成可以回看、串联和继续写的�
 
 [观看 Folio V6 演示（60 秒）](https://tomanojerry-debug.github.io/folio-demo/)
 
+[下载 Mac 客户端源码](https://github.com/tomanojerry-debug/folio-demo/archive/refs/heads/main.zip) · [本地安装说明](#在-macos-上使用-tag)
+
 本仓库包含 Web 工作台、macOS 客户端源码和可在本机打开的示例展览。
 
 ## 在浏览器里体验
@@ -25,24 +27,26 @@ npm run dev
 
 如需本地持久额度或异步采集，给应用和 Worker 配置同一个至少 32 字符的随机 `FORME_WORKER_TOKEN`，将应用的 `FORME_WORKER_URL` 设为 `http://127.0.0.1:8790`。另开终端执行 `npm run worker`，保持与 `npm run dev` 同时运行。外部视频采集还有平台可达性及可选的 yt-dlp、FFmpeg、转写运行时要求。
 
-公开运行 Web 体验需要 HTTPS、共享额度账本、服务端模型密钥与独立的部署数据目录。腾讯云部署草稿见 [deploy/README.md](deploy/README.md)。
+公开运行 Web 体验需要 HTTPS、共享额度账本、服务端模型密钥与独立的部署数据目录。部署说明见 [deploy/README.md](deploy/README.md)。
 
 ## 在 macOS 上使用 Tag
 
-需要 macOS 13 或更新版本、Node.js 22 和带 Swift 的 Xcode Command Line Tools。若还未安装命令行工具，运行 `xcode-select --install`。
+下载并解压源码。需要 macOS 13 或更新版本、Node.js 22 和带 Swift 的 Xcode Command Line Tools。若还未安装命令行工具，运行 `xcode-select --install`。
 
 ```sh
 npm ci
-npm run desktop
+npm run desktop -- --personal --setup-model
 ```
 
-首次启动会从源码编译 Folio。进入演示馆可浏览预置收藏和展览。演示馆关闭模型调用，数据写入本地 `.data/folio-demo/`。
+首次启动会从源码编译 Folio。按页面提示填写支持 Chat Completions 的 API 地址、模型名称和自己的 API Key。连接成功后即可和 Tag 对话。Key 保存在仅本机用户可读取的配置文件中。模型问答会把相关内容发送给你选择的模型服务。
 
-个人模式下，先从 Folio 菜单退出，再运行 `npm run desktop -- --personal`。个人收藏、对话和笔记保存在 `.data/desktop/`，自带的模型配置从本地 `.env` 读取。模型未配置时仍能保存资料。默认本机语义索引需要首次下载公开模型，缺网时可在 `.env` 中设置 `KNOWLEDGE_EMBEDDING_BACKEND=disabled` 使用全文检索。连接文本模型后，理解和问答会按功能向所配置的模型服务发送相关内容。
+只想浏览示例时，从 Folio 菜单退出后运行 `npm run desktop`。演示馆包含预置收藏和展览，无需模型，数据写入 `.data/folio-demo/`。
+
+开发者也可通过 `npm run desktop -- --personal` 使用本地 `.env` 配置。源码启动的个人收藏、对话和笔记保存在 `.data/desktop/`。默认本机语义索引会在首次使用时下载公开模型，可在 `.env` 中设置 `KNOWLEDGE_EMBEDDING_BACKEND=disabled` 使用全文检索。
 
 桌面联网搜索默认关闭。要启用，在本机 `.env` 中设置 `ZHIPU_WEB_SEARCH_MCP_URL` 和独立的 `ZHIPU_WEB_SEARCH_API_KEY`，使用具备智谱联网搜索 MCP 权限的凭据。
 
-`npm run desktop:build` 仅构建应用，输出 `desktop/.build/Folio.app`。它引用当前源码和本机 Node，移动源码后请重建。供他人下载的独立安装包还需要内置运行时、Developer ID 签名和公证。Tag 的原生窗口识别和浏览器协作可能需要你在 macOS 中授予对应权限。
+`npm run desktop:build` 构建引用当前源码和本机 Node 的 `desktop/.build/Folio.app`。独立安装包可在 Git 检出目录运行 `npm run desktop:package` 构建，需要 Developer ID 签名及 Apple 公证。Tag 的原生窗口识别和浏览器协作可能需要 macOS 授权。
 
 ## 项目结构
 

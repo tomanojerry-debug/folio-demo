@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>连接模型 · Folio</title>
+  <link rel="stylesheet" href="/curator/model-setup.css">
+  <script type="module" src="/curator/model-setup.js"></script>
+</head>
+<body>
+  <main>
+    <span class="wordmark">Folio</span>
+    <h1>连接你的模型</h1>
+    <p>使用支持 Chat Completions 的模型，让 Tag 帮你阅读、收藏和策展。</p>
+    <form method="post" action="/api/desktop/model-setup">
+      <label>API 地址
+        <input name="baseURL" required placeholder="https://api.openai.com/v1" type="url" autocapitalize="none" spellcheck="false" maxlength="2048">
+      </label>
+      <label>模型名称
+        <input name="model" required placeholder="输入供应商提供的模型名称" autocapitalize="none" spellcheck="false" maxlength="160">
+      </label>
+      <label>API Key
+        <input name="apiKey" required type="password" autocomplete="off" placeholder="输入你的模型 API Key" maxlength="2048">
+      </label>
+      <p class="note">Key 保存在这台 Mac 上，Tag 会直接连接你填写的模型服务。</p>
+      <p id="setup-error" role="alert" hidden></p>
+      <button type="submit">验证并进入 Folio</button>
+    </form>
+  </main>
+</body>
+</html>

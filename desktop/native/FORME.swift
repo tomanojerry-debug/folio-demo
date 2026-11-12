@@ -2765,9 +2765,17 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
     var stage: NSWindow?
     var stageWeb: WKWebView?
     var stageReady = false
-    private let personalMode = ProcessInfo.processInfo.arguments.contains("--personal")
+    private let packagedClient = Bundle.main.object(forInfoDictionaryKey: "FOLIOPackagedClient") as? Bool == true
+    private var personalMode: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        return packagedClient ? !arguments.contains("--demo") : arguments.contains("--personal")
+    }
+    private var usesModelSetup: Bool {
+        personalMode && (packagedClient || ProcessInfo.processInfo.arguments.contains("--setup-model"))
+    }
     private var demoTagSignedIn = false
-    private var desktopTagAvailable: Bool { personalMode || demoTagSignedIn }
+    private var modelSetupComplete = false
+    private var desktopTagAvailable: Bool { personalMode ? !usesModelSetup || modelSetupComplete : demoTagSignedIn }
     private let stageMinimumSize = NSSize(width: 720, height: 520)
     private let loginWindowSize = NSSize(width: 420, height: 500)
     private let stageBackground = NSColor(srgbRed: 34.0 / 255.0, green: 35.0 / 255.0, blue: 38.0 / 255.0, alpha: 1)
@@ -2829,7 +2837,7 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(externalApplicationActivated(_:)),
             name: NSWorkspace.didActivateApplicationNotification, object: nil)
         createStatusItem()
-        if personalMode { createPet() }
+        if desktopTagAvailable { createPet() }
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(accessibilityDisplayOptionsChanged(_:)),
             name: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil)
         startBackend()
@@ -2898,6 +2906,10 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
         }
         dockItem.submenu = dockMenu; menu.addItem(dockItem)
         menu.addItem(withTitle: "开启窗口识别…", action: #selector(enableWindowRecognition), keyEquivalent: "")
+        if packagedClient {
+            menu.addItem(withTitle: personalMode ? "切换到离线示例馆" : "切换到个人收藏馆",
+                         action: #selector(reopenInOtherMode), keyEquivalent: "")
+        }
         menu.addItem(.separator())
         menu.addItem(withTitle: "关于 Folio", action: #selector(showAbout), keyEquivalent: "")
         menu.addItem(withTitle: "退出 Folio", action: #selector(quit), keyEquivalent: "q")
@@ -2967,20 +2979,60 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
         pendingWorkspaceChats.removeAll(); pendingConversationURL = nil
     }
 
+    private func backendLaunch() -> (root: URL, node: URL, arguments: [String], environment: [String: String])? {
+        let bundle = Bundle.main
+        let root: URL
+        let node: URL
+        var arguments: [String] = []
+        var environment: [String: String]
+        if packagedClient {
+            guard let resources = bundle.resourceURL,
+                  let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+                return nil
+            }
+            root = resources.appendingPathComponent("runtime", isDirectory: true)
+            node = root.appendingPathComponent("node/bin/node")
+            let data = support.appendingPathComponent("Folio", isDirectory: true)
+                .appendingPathComponent(personalMode ? "Personal" : "Demo", isDirectory: true)
+            environment = [
+                "HOME": NSHomeDirectory(),
+                "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin",
+                "TMPDIR": NSTemporaryDirectory(),
+                "LANG": "en_US.UTF-8",
+                "FORME_DESKTOP_DATA_DIR": data.path,
+                "FORME_PACKAGED_CLIENT": "1",
+                "KNOWLEDGE_LOCAL_CACHE_DIR": data.appendingPathComponent("models", isDirectory: true).path,
+            ]
+        } else {
+            guard let sourceRoot = bundle.object(forInfoDictionaryKey: "FORMEProjectRoot") as? String,
+                  let sourceNode = bundle.object(forInfoDictionaryKey: "FORMENodePath") as? String else {
+                return nil
+            }
+            root = URL(fileURLWithPath: sourceRoot, isDirectory: true)
+            node = URL(fileURLWithPath: sourceNode)
+            arguments.append("--env-file-if-exists=\(sourceRoot)/.env")
+            environment = ProcessInfo.processInfo.environment
+            environment["FORME_DESKTOP_DATA_DIR"] = "\(sourceRoot)/.data/\(personalMode ? "desktop" : "folio-demo")"
+        }
+        let entry = root.appendingPathComponent("desktop/server/index.mjs")
+        guard FileManager.default.isExecutableFile(atPath: node.path),
+              FileManager.default.isReadableFile(atPath: entry.path) else { return nil }
+        arguments.append(entry.path)
+        if personalMode { arguments.append("--personal") }
+        if usesModelSetup { arguments.append("--setup-model") }
+        environment["FORME_DESKTOP_PORT"] = "0"
+        return (root, node, arguments, environment)
+    }
+
     func startBackend() {
-        guard let root = Bundle.main.object(forInfoDictionaryKey: "FORMEProjectRoot") as? String,
-              let node = Bundle.main.object(forInfoDictionaryKey: "FORMENodePath") as? String,
-              FileManager.default.isExecutableFile(atPath: node) else {
+        guard let launch = backendLaunch() else {
             showFailure("暂时找不到本机运行环境。请重新打开应用；如果仍无法启动，请联系维护者重新准备这个本机版本。")
             return
         }
-        let process = Process(); process.executableURL = URL(fileURLWithPath: node)
-        process.arguments = ["--env-file-if-exists=\(root)/.env", "\(root)/desktop/server/index.mjs"] + (personalMode ? ["--personal"] : [])
-        process.currentDirectoryURL = URL(fileURLWithPath: root)
-        var environment = ProcessInfo.processInfo.environment
-        environment["FORME_DESKTOP_DATA_DIR"] = "\(root)/.data/desktop"
-        environment["FORME_DESKTOP_PORT"] = "0"
-        process.environment = environment
+        let process = Process(); process.executableURL = launch.node
+        process.arguments = launch.arguments
+        process.currentDirectoryURL = launch.root
+        process.environment = launch.environment
         let output = Pipe(); process.standardOutput = output
         backendReadHandle = output.fileHandleForReading
         process.standardError = FileHandle.standardError
@@ -2996,7 +3048,7 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
                     let prefix = "FORME_DESKTOP_READY "
                     if line.hasPrefix(prefix), let url = URL(string: String(line.dropFirst(prefix.count))), url.host == "127.0.0.1", !self.started {
                         self.started = true; self.backendURL = url
-                        if self.personalMode { self.showChat() } else { self.showStage() }
+                        if self.personalMode && !self.usesModelSetup { self.showChat() } else { self.showStage() }
                     }
                     let eventPrefix = "FORME_DESKTOP_EVENT "
                     if line.hasPrefix(eventPrefix),
@@ -4249,14 +4301,14 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
         }
     }
 
-    private func trustedDemoStageURL(for webView: WKWebView) -> URL? {
-        guard webView === stageWeb, !personalMode, let base = backendURL, let url = webView.url, let port = url.port,
+    private func trustedStageURL(for webView: WKWebView) -> URL? {
+        guard webView === stageWeb, let base = backendURL, let url = webView.url, let port = url.port,
               DialogOrigin.isTrusted(scheme: url.scheme ?? "", host: url.host ?? "", port: port, base: base) else { return nil }
         return url
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        guard let url = trustedDemoStageURL(for: webView) else { return }
+        guard !personalMode, let url = trustedStageURL(for: webView) else { return }
         let login = url.path == "/login"
         if login { setDemoTagSignedIn(false) }
         setStageLoginLayout(login)
@@ -4267,15 +4319,20 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
             sendContext(); updateAccessibilityAppearance(); focusChatComposer()
         }
         if webView === stageWeb {
-            // The demo server redirects this protected document to /login until the session is valid.
-            if let url = trustedDemoStageURL(for: webView), url.path == surfaceURL("stage")?.path {
-                setDemoTagSignedIn(true)
+            let url = trustedStageURL(for: webView)
+            if let url = url, url.path == surfaceURL("stage")?.path {
+                if !personalMode { setDemoTagSignedIn(true) }
+                else if usesModelSetup && !modelSetupComplete {
+                    modelSetupComplete = true
+                    createPet()
+                }
             }
             updateAccessibilityAppearance()
             let conversation = webView.url?.fragment == "chat" || webView.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }?.queryItems?.contains(where: { $0.name == "surface" && $0.value == "workspace-chat" }) == true
-            let signIn = webView.url?.path == "/login"
-            stage?.title = signIn ? "登录 Folio" : conversation ? "Folio · 和 Tag 对话" : "Folio · 私人收藏馆"
-            stageReady = !signIn
+            let signIn = url?.path == "/login"
+            let setup = url?.path == "/curator/model-setup.html"
+            stage?.title = signIn ? "登录 Folio" : setup ? "设置 Folio" : conversation ? "Folio · 和 Tag 对话" : "Folio · 私人收藏馆"
+            stageReady = url != nil && !signIn && !setup
             if stageReady { showRequestedExhibition() }
             if let requested = pendingConversationURL, webView.url == requested {
                 pendingConversationURL = nil
@@ -4422,8 +4479,23 @@ final class CuratorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler,
     }
 
     @objc func showAbout() {
-        showFailure("Folio · Collect. Connect. Curate.\n\nTag 是陪你浏览、收藏和策展的小展签。这是本机开发版。桌宠与收藏馆使用系统原生窗口；收藏、性格和后台任务保存在这台电脑。\n\n拖到窗口后会关注这页，并在你打开对话时询问是否收藏。已获准的浏览器会提供当前页标题与地址；页面对话只参考这次关联的内容，只有你确认或明确说收藏时才入库。无法读取时可贴链接或正文。\n\n关闭对话不会停止整理；退出整个应用后，任务会在下次启动时恢复或提示重试。")
+        let buildNote = packagedClient ? "" : "这是本机开发版。"
+        showFailure("Folio · Collect. Connect. Curate.\n\nTag 是陪你浏览、收藏和策展的小展签。\(buildNote)桌宠与收藏馆使用系统原生窗口；收藏、性格和后台任务保存在这台电脑。\n\n拖到窗口后会关注这页，并在你打开对话时询问是否收藏。已获准的浏览器会提供当前页标题与地址；页面对话只参考这次关联的内容，只有你确认或明确说收藏时才入库。无法读取时可贴链接或正文。\n\n关闭对话不会停止整理；退出整个应用后，任务会在下次启动时恢复或提示重试。")
     }
+
+    @objc private func reopenInOtherMode() {
+        guard packagedClient else { return }
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.createsNewApplicationInstance = true
+        configuration.arguments = personalMode ? ["--demo"] : []
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { [weak self] _, error in
+            DispatchQueue.main.async {
+                if error == nil { self?.quit() }
+                else { self?.showFailure("暂时无法切换收藏馆，请重新打开 Folio 后再试。") }
+            }
+        }
+    }
+
     @objc func quit() { NSApp.terminate(nil) }
 }
 

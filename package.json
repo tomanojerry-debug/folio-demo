@@ -9,6 +9,7 @@
   "scripts": {
     "desktop": "node desktop/scripts/launch.mjs",
     "desktop:build": "node desktop/scripts/build.mjs",
+    "desktop:package": "node desktop/scripts/package.mjs",
     "desktop:server": "node --env-file-if-exists=.env desktop/server/index.mjs",
     "dev": "node --env-file-if-exists=.env server/dev.mjs",
     "worker": "node --env-file-if-exists=.env worker/index.mjs",

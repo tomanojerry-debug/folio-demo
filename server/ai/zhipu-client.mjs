@@ -9,9 +9,11 @@ export async function createTextCompletion(config, { messages, temperature, resp
     messages,
     temperature,
     max_tokens: config.textMaxTokens,
-    thinking: flash ? { type: "enabled", clear_thinking: true } : { type: "disabled" },
   };
-  if (flash) request.reasoning_effort = config.reasoningEffort;
+  if (config.textProvider !== "openai-compatible") {
+    request.thinking = flash ? { type: "enabled", clear_thinking: true } : { type: "disabled" };
+    if (flash) request.reasoning_effort = config.reasoningEffort;
+  }
   if (responseFormat) request.response_format = { type: responseFormat };
   const data = await postModelJson(`${config.zhipuBaseUrl}/chat/completions`, config.zhipuApiKey, request, { timeoutMs: config.timeoutMs, signal });
   if (!Array.isArray(data?.choices)) throw fault("MODEL_OUTPUT_INVALID", 502);

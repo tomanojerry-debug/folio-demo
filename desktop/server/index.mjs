@@ -7,9 +7,12 @@ import { createDesktopService } from "./service.mjs";
 import { acquireDataLock } from "./lock.mjs";
 import { loadDemoLibrary } from "./demo-library.mjs";
 import { createDemoSession, demoPassword, demoStage, demoUsername, isWorkspacePage } from "./demo-session.mjs";
+import { checkModelProfile, loadModelProfile, modelConfig, saveModelProfile } from "./model-setup.mjs";
 
 const projectRoot = fileURLToPath(new URL("../../", import.meta.url));
 const uiRoot = path.join(projectRoot, "site/curator");
+const setupRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "setup");
+const setupFiles = new Set(["model-setup.html", "model-setup.css", "model-setup.js"]);
 const assetRoot = path.join(projectRoot, "site/prototype/immersive-exhibition/assets");
 const legacyRoot = path.dirname(assetRoot);
 const vendorRoot = path.join(projectRoot, "site/vendor/ogl/src");
@@ -45,7 +48,10 @@ async function readJSON(req, maxBytes = 250000) {
 
 export async function startDesktopServer(options = {}) {
   const presentation = options.presentation === true;
-  const directory = options.directory || (presentation ? path.join(projectRoot, ".data/folio-demo") : process.env.FORME_DESKTOP_DATA_DIR || path.join(projectRoot, ".data/desktop"));
+  const packaged = process.env.FORME_PACKAGED_CLIENT === "1";
+  const modelSetup = !presentation && (options.modelSetup ?? packaged);
+  const dataDirectory = (packaged || !presentation) && process.env.FORME_DESKTOP_DATA_DIR;
+  const directory = options.directory || dataDirectory || path.join(projectRoot, presentation ? ".data/folio-demo" : ".data/desktop");
   const port = options.port ?? Number(process.env.FORME_DESKTOP_PORT || 0);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error("FORME_DESKTOP_PORT must be between 0 and 65535");
   const lock = await acquireDataLock(directory);
@@ -53,6 +59,7 @@ export async function startDesktopServer(options = {}) {
   let server;
   let closing = false;
   let closePromise;
+  let configuring = false;
   const streams = new Map();
   const sessions = presentation ? createDemoSession() : null;
   const broadcast = () => { for (const stream of streams.keys()) if (!stream.destroyed) stream.write("event: state\ndata: {}\n\n"); };
@@ -63,7 +70,16 @@ export async function startDesktopServer(options = {}) {
     exhibitionCount: demoLibrary.length,
   } : null;
   const demoOptions = presentation ? { aiEnabled:false, searchWeb:null, autoCurate:false, seedStarterContent:false, knowledgeEmbedder:null, knowledgeReranker:null } : {};
-  service = await createDesktopService({ ...options, ...demoOptions, directory, demoLibrary, onChange: () => { broadcast(); options.onChange?.(); } });
+  const initialize = profile => createDesktopService({
+    ...options,
+    ...demoOptions,
+    ...(profile ? { config: modelConfig(profile), aiEnabled: true } : {}),
+    directory,
+    demoLibrary,
+    onChange: () => { broadcast(); options.onChange?.(); },
+  });
+  const profile = modelSetup ? await loadModelProfile(directory) : null;
+  if (!modelSetup || profile) service = await initialize(profile);
   let origin;
   server = http.createServer(async (req, res) => {
     if (closing) return json(res, 503, { error: "本地服务正在退出，请稍后重试。", code: "SERVICE_STOPPING" });
@@ -75,6 +91,21 @@ export async function startDesktopServer(options = {}) {
       const url = new URL(req.url, origin);
       const pathname = decodeURIComponent(url.pathname);
       const session = sessions?.current(req);
+      if (modelSetup && pathname === "/api/desktop/model-setup") {
+        if (req.method === "GET") return json(res, 200, { configured: Boolean(service) });
+        if (req.method !== "POST") return json(res, 405, { error: "不支持这个请求。" });
+        if (req.headers.origin !== origin) return json(res, 403, { error: "本地操作必须来自当前页面。", code: "INVALID_ORIGIN" });
+        if (service || configuring) return json(res, 409, { error: "模型已配置或正在验证。", code: "MODEL_SETUP_CONFLICT" });
+        configuring = true;
+        try {
+          const candidate = await checkModelProfile(await readJSON(req, 8192));
+          const next = await initialize(candidate);
+          try { await saveModelProfile(directory, candidate); }
+          catch (error) { await next.close(); throw error; }
+          service = next;
+          return json(res, 200, { configured: true });
+        } finally { configuring = false; }
+      }
       if (sessions && pathname === "/api/desktop/session") {
         if (req.method === "GET") return json(res, 200, { signedIn:Boolean(session), username:demoUsername, password:demoPassword, catalog:demoCatalog });
         if (req.method !== "POST" && req.method !== "DELETE") return json(res, 405, { error:"不支持这个请求。" });
@@ -93,6 +124,7 @@ export async function startDesktopServer(options = {}) {
       if (url.pathname.startsWith("/api/desktop/")) {
         if (req.method === "GET" && url.pathname === "/api/desktop/health") return json(res, 200, { ok: true });
         if (sessions && !session) return json(res, 401, { error:"请先登录 Folio。", code:"SIGN_IN_REQUIRED" });
+        if (!service) return json(res, 409, { error: "请先连接模型。", code: "MODEL_SETUP_REQUIRED" });
         if (["GET", "HEAD"].includes(req.method) && url.pathname.startsWith("/api/desktop/covers/")) {
           const cover = await service.readCover(url.pathname.slice("/api/desktop/covers/".length));
           if (!cover) return json(res, 404, { error: "找不到收藏封面。", code: "NOT_FOUND" });
@@ -140,6 +172,7 @@ export async function startDesktopServer(options = {}) {
         return json(res, 200, await route());
       }
       if (!["GET", "HEAD"].includes(req.method)) return json(res, 405, { error: "不支持这个请求。" });
+      if (modelSetup && !service && isWorkspacePage(pathname)) return redirect(res, "/curator/model-setup.html");
       if (sessions && isWorkspacePage(pathname)) {
         if (!session) return redirect(res, pathname === "/" ? "/login" : `/login?${new URLSearchParams({ next:pathname + url.search })}`);
         if (pathname === "/") return redirect(res, `${demoStage}#gallery`);
@@ -151,7 +184,9 @@ export async function startDesktopServer(options = {}) {
       const controls = pathname.startsWith("/vendor/basecoat/");
       let root = assets ? assetRoot : uiRoot;
       let relative = login ? "login.html" : assets ? pathname.slice(8) : pathname.replace(/^\/(?:curator\/?)?/, "");
-      if (legacy) {
+      if (modelSetup && pathname === `/curator/${relative}` && setupFiles.has(relative)) {
+        root = setupRoot;
+      } else if (legacy) {
         relative = pathname.slice("/prototype/immersive-exhibition/".length);
         if (relative.startsWith("assets/")) {
           root = assetRoot; relative = relative.slice(7);
@@ -188,7 +223,8 @@ export async function startDesktopServer(options = {}) {
   await new Promise((resolve, reject) => { server.once("error", reject); server.listen(port, "127.0.0.1", resolve); });
   origin = `http://127.0.0.1:${server.address().port}`;
   return {
-    origin, service, server,
+    origin, server,
+    get service() { return service; },
     close() {
       if (closePromise) return closePromise;
       closing = true;
@@ -198,7 +234,8 @@ export async function startDesktopServer(options = {}) {
       // the final flush or after a replacement process acquires the lock.
       const httpClosed = new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
       closePromise = (async () => {
-        const results = await Promise.allSettled([service.close(), httpClosed]);
+        const serviceClosed = modelSetup ? httpClosed.finally(() => service?.close()) : service.close();
+        const results = await Promise.allSettled([serviceClosed, httpClosed]);
         await lock.release();
         const failed = results.find((result) => result.status === "rejected");
         if (failed) throw failed.reason;
@@ -233,7 +270,7 @@ export function shutdownWithDeadline(runtime, { timeoutMs = 4000, exit = (code) 
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  startDesktopServer({ presentation: !process.argv.includes("--personal"), onEvent: (event) => {
+  startDesktopServer({ presentation: !process.argv.includes("--personal"), modelSetup: process.argv.includes("--setup-model") || undefined, onEvent: (event) => {
     if (event.type === "exhibition-ready" && typeof event.exhibitionId === "string") console.log(`FORME_DESKTOP_EVENT ${JSON.stringify({ type: event.type, exhibitionId: event.exhibitionId })}`);
   } }).then((runtime) => {
     console.log(`FORME_DESKTOP_READY ${runtime.origin}`);

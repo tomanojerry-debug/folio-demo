@@ -8,6 +8,7 @@ import path from 'node:path';
 export const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 export const buildRoot = path.join(projectRoot, 'desktop/.build');
 export const appPath = path.join(buildRoot, 'Folio.app');
+export const appVersion = '0.3.9';
 const buildScript = fileURLToPath(import.meta.url);
 const nativeSource = path.join(projectRoot, 'desktop/native/FORME.swift');
 const entitlements = path.join(projectRoot, 'desktop/native/FORME.entitlements');
@@ -32,61 +33,78 @@ async function nativeFingerprint(identity, architecture) {
     process.env.DEVELOPER_DIR, process.env.SDKROOT, files])).digest('hex');
 }
 
-async function signingIdentity() {
+async function signingIdentity({ packaged, local }) {
+  if (local) return '-';
   const configured = process.env.FOLIO_CODESIGN_IDENTITY?.trim() || '-';
-  if (configured === '-') return configured;
+  if (configured === '-') {
+    if (packaged) throw new Error('发布安装包需要 FOLIO_CODESIGN_IDENTITY 指定 Developer ID Application 证书。');
+    return configured;
+  }
   const { stdout } = await exec('/usr/bin/security', ['find-identity', '-v', '-p', 'codesigning']);
   const identities = [...stdout.matchAll(/^\s*\d+\) ([A-F0-9]{40}) "([^\r\n]+)"\s*$/gmi)];
   const matches = identities.filter(([, hash, name]) => hash.toUpperCase() === configured.toUpperCase() || name === configured);
   if (matches.length !== 1) throw new Error('FOLIO_CODESIGN_IDENTITY 必须匹配一个有效的本机代码签名身份。请使用完整名称或证书指纹。');
+  if (packaged && !matches[0][2].startsWith('Developer ID Application:')) {
+    throw new Error('发布安装包需要 Developer ID Application 证书。');
+  }
   return matches[0][1].toUpperCase();
 }
 
-function verifySignature(identity) {
+function verifySignature(identity, output) {
   const requirement = identity === '-' ? [] : [`-R=certificate leaf = H"${identity}"`];
-  return run('/usr/bin/codesign', ['--verify', '--deep', '--strict', ...requirement, appPath]);
+  return run('/usr/bin/codesign', ['--verify', '--deep', '--strict', ...requirement, output]);
 }
 
-export async function build({ reuseNative = false } = {}) {
+export async function build({ reuseNative = false, output = appPath, workDirectory = buildRoot, prepareRuntime, local = false } = {}) {
   if (process.platform !== 'darwin') throw new Error('当前桌面版需要在苹果电脑上构建，网页版收藏馆可在其他系统使用。');
-  const contents = path.join(appPath, 'Contents');
+  const packaged = Boolean(prepareRuntime);
+  const contents = path.join(output, 'Contents');
   const binary = path.join(contents, 'MacOS/FORME');
   const infoPath = path.join(contents, 'Info.plist');
   const architecture = process.arch === 'arm64' ? 'arm64' : 'x86_64';
-  const identity = await signingIdentity();
-  const fingerprint = await nativeFingerprint(identity, architecture);
-  const buildMarker = `<key>FOLIONativeBuildFingerprint</key><string>${fingerprint}</string>`;
-  if (reuseNative) {
+  // The bundled ONNX runtime declares macOS 13.3 as its minimum OS.
+  const minimumSystem = packaged ? '13.3' : '13.0';
+  const identity = await signingIdentity({ packaged, local });
+  const fingerprint = packaged ? '' : await nativeFingerprint(identity, architecture);
+  const buildMarker = packaged ? '' : `<key>FOLIONativeBuildFingerprint</key><string>${fingerprint}</string>`;
+  if (reuseNative && !packaged) {
     const previous = await readFile(infoPath, 'utf8').catch(error => {
       if (error.code === 'ENOENT') return '';
       throw error;
     });
     if (previous.includes(buildMarker)) {
-      const verified = await verifySignature(identity).then(() => true, () => false);
+      const verified = await verifySignature(identity, output).then(() => true, () => false);
       if (verified) {
         await run(binary, ['--geometry-test']);
-        console.log(`FORME_APP_PATH ${appPath}`);
-        return appPath;
+        console.log(`FORME_APP_PATH ${output}`);
+        return output;
       }
     }
   }
 
   await mkdir(path.dirname(binary), { recursive: true });
-  await mkdir(path.join(buildRoot, 'module-cache'), { recursive: true });
+  const moduleCache = path.join(workDirectory, 'module-cache');
+  await mkdir(moduleCache, { recursive: true });
   const resources = path.join(contents, 'Resources');
   await mkdir(resources, { recursive: true });
   for (const name of companionResources) {
     await copyFile(path.join(companionAssets, name), path.join(resources, name));
   }
-  await run('/usr/bin/xcrun', ['swiftc', '-swift-version', '5', '-target', `${architecture}-apple-macosx13.0`, '-O', '-module-cache-path', path.join(buildRoot, 'module-cache'),
+  await run('/usr/bin/xcrun', ['swiftc', '-swift-version', '5', '-target', `${architecture}-apple-macosx${minimumSystem}`, '-O', '-module-cache-path', moduleCache,
     '-framework', 'AppKit', '-framework', 'WebKit', '-framework', 'ApplicationServices',
     nativeSource, '-o', binary]);
-  const iconRenderer = path.join(buildRoot, 'render-app-icon');
-  await run('/usr/bin/xcrun', ['swiftc', '-swift-version', '5', '-O', '-module-cache-path', path.join(buildRoot, 'module-cache'),
+  const iconRenderer = path.join(workDirectory, 'render-app-icon');
+  await run('/usr/bin/xcrun', ['swiftc', '-swift-version', '5', '-O', '-module-cache-path', moduleCache,
     '-framework', 'AppKit', iconSource, '-o', iconRenderer]);
-  const iconset = path.join(buildRoot, 'Folio.iconset');
+  const iconset = path.join(workDirectory, 'Folio.iconset');
   await run(iconRenderer, [iconset, companionAssets]);
   await run('/usr/bin/iconutil', ['-c', 'icns', iconset, '-o', path.join(resources, 'Folio.icns')]);
+  const runtimeInfo = packaged
+    ? '<key>FOLIOPackagedClient</key><true/>'
+    : `<key>FORMEProjectRoot</key><string>${xml(projectRoot)}</string>
+<key>FORMENodePath</key><string>${xml(process.execPath)}</string>`;
+  const runtimeSignature = packaged && identity !== '-' ? ['--options', 'runtime', '--timestamp'] : [];
+  if (prepareRuntime) await prepareRuntime(resources, { identity, runtimeSignature });
   const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -96,23 +114,22 @@ export async function build({ reuseNative = false } = {}) {
 <key>CFBundleDisplayName</key><string>Folio</string>
 <key>CFBundleIconFile</key><string>Folio</string>
 <key>CFBundleVersion</key><string>16</string>
-<key>CFBundleShortVersionString</key><string>0.3.9</string>
+<key>CFBundleShortVersionString</key><string>${appVersion}</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>LSMinimumSystemVersion</key><string>13.0</string>
+<key>LSMinimumSystemVersion</key><string>${minimumSystem}</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSAppleEventsUsageDescription</key><string>只在你主动关联浏览器页面并使用对话或收藏时，读取所选窗口当前页面的标题和地址。</string>
-<key>FORMEProjectRoot</key><string>${xml(projectRoot)}</string>
-<key>FORMENodePath</key><string>${xml(process.execPath)}</string>
+${runtimeInfo}
 ${buildMarker}
 </dict></plist>
 `;
   await writeFile(infoPath, plist);
-  await run('/usr/bin/codesign', ['--force', '--sign', identity, '--entitlements', entitlements, appPath]);
-  await verifySignature(identity);
+  await run('/usr/bin/codesign', ['--force', '--sign', identity, ...runtimeSignature, '--entitlements', entitlements, output]);
+  await verifySignature(identity, output);
   await run(binary, ['--geometry-test']);
-  console.log(`FORME_APP_PATH ${appPath}`);
-  return appPath;
+  console.log(`FORME_APP_PATH ${output}`);
+  return output;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === buildScript) {
