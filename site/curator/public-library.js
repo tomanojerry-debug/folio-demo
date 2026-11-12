@@ -93,7 +93,12 @@ export function createPublicLibrary(payload, storage) {
   const currentState = () => {
     const sample = publicSample();
     const collections = sample ? [...state.collections, sample.collection] : state.collections;
-    return clone({ ...state, collections, workspace });
+    const conversations = sample ? [{
+      id: sample.collection.id,
+      title: sample.collection.title,
+      createdAt: sample.collection.addedAt,
+    }] : [];
+    return clone({ ...state, collections, conversations, workspace });
   };
   const persist = () => saveData(storage, { workspace, preferences });
 

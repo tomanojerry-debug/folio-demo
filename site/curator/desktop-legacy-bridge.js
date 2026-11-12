@@ -2,6 +2,7 @@ import { renderTaskProgress } from './task-view.js';
 import { closeGlassDialog, frameGlassDialog } from './glass-dialogs.js';
 import { createWorkspaceChatLauncher } from './workspace-chat-launch.js';
 import { mountWorkspaceConversationShell } from './workspace-conversation-shell.js';
+import { mountWorkspaceConversationHistory } from './workspace-conversation-history.js';
 import { mountKnowledgePanel } from './knowledge-panel.js';
 import { mountArticleReading } from './article-reading.js';
 import { curationStoryKey, renderCurationStory, mountCurationStory } from './curation-story.js';
@@ -92,10 +93,11 @@ async function bootstrap() {
   const publicWorkspace = document.documentElement.dataset.publicWorkspace === "true";
   const baseURL = new URL("../", import.meta.url);
   const publicLibrary = publicWorkspace ? await loadPublicLibrary(baseURL) : null;
+  const sampleURL = publicWorkspace ? new URL("try/sample/", baseURL).pathname : null;
   document.documentElement.classList.toggle("is-native", Boolean(window.webkit?.messageHandlers?.forme) && !publicWorkspace);
   const productURL = productWorkspaceURL(location.href);
   if (productURL.href !== location.href) history.replaceState(history.state, "", productURL);
-  let remote, current, store, refresh, openCollection, navigatePage, dialog, conversationShell, knowledgePanel, articleReading, curationStory, openReadingNote, readingSettings, selected = null;
+  let remote, current, store, refresh, openCollection, navigatePage, dialog, conversationShell, publicHistory, knowledgePanel, articleReading, curationStory, openReadingNote, readingSettings, selected = null;
   let readingContainer, readingCollectionId, readingSourceKey;
   let resolveShell;
   const shellReady = new Promise(resolve => { resolveShell = resolve; });
@@ -193,6 +195,7 @@ async function bootstrap() {
       await writes;
       remote = await api("state");
       conversationShell?.update(remote);
+      publicHistory?.render();
       const next = mapDesktopState(remote, current);
       if (failedOps.length) {
         for (const field of [...mapFields, ...rowFields]) next[field] = current[field];
@@ -255,7 +258,7 @@ async function bootstrap() {
   }
   const liveAI = {
     async capture(input) {
-      if (publicWorkspace) { location.assign(new URL("try/sample/", baseURL)); return false; }
+      if (publicWorkspace) { location.assign(sampleURL); return false; }
       return await action("capture", input) || false;
     },
     async retry(collectionId) { if (!remote?.capabilities?.aiEnabled) return false; return await action("retry", { collectionId }) || false; },
@@ -309,7 +312,7 @@ async function bootstrap() {
   };
   window.__FORME_DESKTOP__ = {
     initialState: clone(current), storage: adapter, liveAI, flushWorkspace,
-    ...(publicWorkspace ? { sampleURL: new URL("try/sample/", baseURL).pathname } : { openChat }),
+    ...(publicWorkspace ? { sampleURL, openSampleConversation } : { openChat }),
     ...(!publicWorkspace ? { async collectionCoverColor(collectionId) { return (await api("collection-cover/color", { collectionId })).color; } } : {}),
     onWorkspaceRender: () => { conversationShell?.syncVisibility(); knowledgePanel?.sync(); syncReading(); },
     mountLiveAI(config) {
@@ -354,6 +357,11 @@ async function bootstrap() {
       dialog?.close(); openCollection?.(id);
     }
   }
+  function openSampleConversation() {
+    const saved = remote.conversations?.[0];
+    if (saved) return showCollection(saved.id);
+    location.assign(sampleURL);
+  }
   window.formeNative = { ...(window.formeNative || {}), refresh: sync, async openExhibition(id) { await sync(); if (conversationShell?.isVisible()) conversationShell.leave('gallery'); liveAI.show(id); }, openCollection: showCollection };
   document.addEventListener("focusout", () => { setTimeout(() => { if (deferredRefresh) refreshSafely(); if (deferredDialog) draw(); }, 0); });
   window.addEventListener("focus", () => { if (failedOps.length) queueWorkspace([]); void sync(); });
@@ -365,7 +373,15 @@ async function bootstrap() {
     window.addEventListener("pagehide", () => events.close(), { once: true });
   }
   await import("../prototype/immersive-exhibition/app.js");
-  if (!publicWorkspace) await Promise.resolve().then(async () => {
+  if (publicWorkspace) {
+    publicHistory = mountWorkspaceConversationHistory({
+      root: document.querySelector("[data-workspace-conversations]"),
+      getState: () => remote,
+      emptyText: "整理过的示例会显示在这里",
+      onNew: () => location.assign(sampleURL),
+      onSelect: showCollection,
+    });
+  } else await Promise.resolve().then(async () => {
     conversationShell = mountWorkspaceConversationShell({
       getState:() => remote,
       navigatePage:page => navigatePage?.(page),
@@ -380,7 +396,7 @@ async function bootstrap() {
       status(errorMessage(error),true,() => { void conversationShell.route().catch(retryError => status(errorMessage(retryError),true)); });
     });
   });
-  window.addEventListener('pagehide',() => { conversationShell?.destroy(); knowledgePanel?.destroy(); readingSettings?.destroy(); curationStory?.destroy(); },{once:true});
+  window.addEventListener('pagehide',() => { conversationShell?.destroy(); publicHistory?.destroy(); knowledgePanel?.destroy(); readingSettings?.destroy(); curationStory?.destroy(); },{once:true});
   const exhibitionId = new URL(location.href).searchParams.get("exhibition");
   if (exhibitionId) liveAI.show(exhibitionId);
   const collectionId = new URL(location.href).searchParams.get("collection");

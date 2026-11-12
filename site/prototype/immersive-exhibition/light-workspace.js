@@ -546,28 +546,39 @@ function showNote(note, kind, callbacks) {
 function showChatContext(callbacks, trigger) {
   if (document.querySelector(".ws-chat-context-dialog[open]")) return;
   const current = callbacks.state();
-  const collections = current.collections;
+  const publicLinks = trigger.form?.hasAttribute("data-public-link-form");
+  const collections = publicLinks ? current.collections.filter(item => sourceLinkKey(item.url)) : current.collections;
+  const selectionType = publicLinks ? "radio" : "checkbox";
+  const inputSelector = `input[type="${selectionType}"]`;
   const searchText = collections.map(item => {
     const extraction = current.extractions?.find(entry => entry.collectionId === item.id);
     const tags = current.feedback?.[`understanding:${item.id}`]?.acceptedTags || [...(extraction?.tags || []), ...(extraction?.concepts || []), ...(item.tags || [])];
     return [item.title, item.source, item.summary, extraction?.summary, ...tags].join(" ").toLocaleLowerCase();
   });
   const existingIds = new Set(collections.map(item => item.id));
-  const selected = new Set(homeContextIds.filter(id => existingIds.has(id)).slice(0, 6));
+  const previousLink = publicLinks && sourceLinkKey(homeDraft);
+  const previousCollection = previousLink && collections.find(item => sourceLinkKey(item.url) === previousLink);
+  const selected = new Set(publicLinks ? (previousCollection ? [previousCollection.id] : []) : homeContextIds.filter(id => existingIds.has(id)).slice(0, 6));
   const dialog = document.createElement("dialog");
   dialog.className = "ws-help ws-chat-context-dialog";
   dialog.setAttribute("aria-labelledby", "ws-chat-context-title");
   dialog.setAttribute("aria-describedby", "ws-chat-context-description");
-  dialog.innerHTML = `<header><div><span class="ws-eyebrow">这次对话的参考</span><h2 id="ws-chat-context-title">带上几件收藏</h2></div><button type="button" class="btn ws-icon-button" data-variant="ghost" data-size="icon-sm" data-context-close aria-label="关闭收藏选择">${icon("close")}</button></header><p id="ws-chat-context-description">选择这次想一起看的内容，最多 6 件。</p>${collections.length ? `<label class="ws-search ws-chat-context-search" for="ws-chat-context-search">${icon("search")}<input class="input" id="ws-chat-context-search" type="search" aria-label="搜索引用收藏" placeholder="搜索标题、来源或线索" autocomplete="off"/></label>` : ""}<div class="ws-chat-context-list" role="group" aria-label="选择参考收藏">${collections.map(item => `<label data-context-row><input type="checkbox" value="${escape(item.id)}"${selected.has(item.id) ? " checked" : ""}/><span><strong>${escape(item.title)}</strong><small>${escape(item.source || "我的收藏")}${date(item.addedAt) ? ` · ${date(item.addedAt)}` : ""}</small></span><i class="ws-context-check" aria-hidden="true">${icon("check")}</i></label>`).join("")}</div><div class="ws-chat-context-empty" data-context-empty${collections.length ? " hidden" : ""}>${icon(collections.length ? "search" : "inbox")}<h3>${collections.length ? "没有找到这件收藏" : "从一件喜欢的内容开始"}</h3><p>${collections.length ? "试试其他关键词，已选的收藏会为你保留。" : "先收下一篇文章、一张图片，或一段自己的想法。"}</p>${collections.length ? '<button type="button" class="ws-button" data-context-reset-search>清除搜索</button>' : '<button type="button" class="ws-button" data-context-capture>收一条新的</button>'}</div><p class="ws-context-limit" data-context-limit role="status" aria-live="polite"></p><footer class="ws-chat-context-footer"><span data-context-count aria-live="polite"></span><div><button type="button" class="btn ws-button" data-variant="outline" data-size="sm" data-context-close>取消</button><button type="button" class="btn ws-button ws-button-primary" data-size="sm" data-context-apply${collections.length ? "" : " disabled"}>带上这些收藏</button></div></footer>`;
+  dialog.innerHTML = `<header><div><span class="ws-eyebrow">${publicLinks ? "示例收藏" : "这次对话的参考"}</span><h2 id="ws-chat-context-title">${publicLinks ? "选择一件收藏" : "带上几件收藏"}</h2></div><button type="button" class="btn ws-icon-button" data-variant="ghost" data-size="icon-sm" data-context-close aria-label="关闭收藏选择">${icon("close")}</button></header><p id="ws-chat-context-description">${publicLinks ? "选择一件收藏，把它的来源链接交给 Tag。" : "选择这次想一起看的内容，最多 6 件。"}</p>${collections.length ? `<label class="ws-search ws-chat-context-search" for="ws-chat-context-search">${icon("search")}<input class="input" id="ws-chat-context-search" type="search" aria-label="搜索引用收藏" placeholder="搜索标题、来源或线索" autocomplete="off"/></label>` : ""}<div class="ws-chat-context-list" role="${publicLinks ? "radiogroup" : "group"}" aria-label="选择参考收藏">${collections.map(item => `<label data-context-row><input type="${selectionType}" name="workspace-context" value="${escape(item.id)}"${selected.has(item.id) ? " checked" : ""}/><span><strong>${escape(item.title)}</strong><small>${escape(item.source || "我的收藏")}${date(item.addedAt) ? ` · ${date(item.addedAt)}` : ""}</small></span><i class="ws-context-check" aria-hidden="true">${icon("check")}</i></label>`).join("")}</div><div class="ws-chat-context-empty" data-context-empty${collections.length ? " hidden" : ""}>${icon(collections.length ? "search" : "inbox")}<h3>${collections.length ? "没有找到这件收藏" : "从一件喜欢的内容开始"}</h3><p>${collections.length ? "试试其他关键词，已选的收藏会为你保留。" : "先收下一篇文章、一张图片，或一段自己的想法。"}</p>${collections.length ? '<button type="button" class="ws-button" data-context-reset-search>清除搜索</button>' : '<button type="button" class="ws-button" data-context-capture>收一条新的</button>'}</div><p class="ws-context-limit" data-context-limit role="status" aria-live="polite"></p><footer class="ws-chat-context-footer"><span data-context-count aria-live="polite"></span><div><button type="button" class="btn ws-button" data-variant="outline" data-size="sm" data-context-close>取消</button><button type="button" class="btn ws-button ws-button-primary" data-size="sm" data-context-apply${collections.length ? "" : " disabled"}>带上这些收藏</button></div></footer>`;
   let applied = false;
   const update = () => {
-    dialog.querySelector("[data-context-count]").textContent = `已选 ${selected.size} / 6 件`;
+    dialog.querySelector("[data-context-count]").textContent = `已选 ${selected.size} / ${publicLinks ? 1 : 6} 件`;
     dialog.querySelector("[data-context-limit]").textContent = selected.size >= 6 ? "已选满 6 件，取消一件后可以继续选择。" : "";
-    dialog.querySelectorAll('input[type="checkbox"]').forEach(input => {
+    dialog.querySelectorAll(inputSelector).forEach(input => {
       input.disabled = selected.size >= 6 && !input.checked;
       input.closest("label").dataset.selected = String(input.checked);
     });
-    dialog.querySelector("[data-context-apply]").textContent = selected.size ? `带上 ${selected.size} 件收藏` : homeContextIds.length ? "清除本次引用" : "暂不引用";
+    const apply = dialog.querySelector("[data-context-apply]");
+    if (publicLinks) {
+      apply.disabled = selected.size === 0;
+      apply.textContent = "填入来源链接";
+    } else {
+      apply.textContent = selected.size ? `带上 ${selected.size} 件收藏` : homeContextIds.length ? "清除本次引用" : "暂不引用";
+    }
   };
   const search = () => {
     const query = dialog.querySelector('input[type="search"]')?.value.trim().toLocaleLowerCase() || "";
@@ -580,7 +591,8 @@ function showChatContext(callbacks, trigger) {
   };
   dialog.addEventListener("input", event => { if (event.target.matches('input[type="search"]')) search(); });
   dialog.addEventListener("change", event => {
-    if (!event.target.matches('input[type="checkbox"]')) return;
+    if (!event.target.matches(inputSelector)) return;
+    if (publicLinks) selected.clear();
     if (event.target.checked && selected.size < 6) selected.add(event.target.value);
     else if (!event.target.checked) selected.delete(event.target.value);
     else event.target.checked = false;
@@ -593,6 +605,20 @@ function showChatContext(callbacks, trigger) {
     }
     if (event.target.closest("[data-context-capture]")) void closeGlassDialog(dialog).then(() => callbacks.capture());
     if (event.target.closest("[data-context-apply]") && !applied) {
+      if (publicLinks) {
+        const collection = collections.find(item => selected.has(item.id));
+        if (!collection) return;
+        applied = true;
+        void closeGlassDialog(dialog).then(() => {
+          const input = document.querySelector("[data-public-link-form] textarea");
+          if (!input) return;
+          input.value = homeDraft = collection.url;
+          chatFeedback = "已填入来源链接，发送给 Tag 查看。";
+          updateHomeChatControls();
+          input.focus({ preventScroll: true });
+        });
+        return;
+      }
       applied = true;
       homeContextIds = [...selected].filter(id => callbacks.state().collections.some(item => item.id === id)).slice(0, 6);
       void closeGlassDialog(dialog).then(() => {
@@ -622,9 +648,10 @@ function updateHomeChatControls() {
   sizeHomeComposer();
   const available = workspaceChatAvailable();
   const input = document.querySelector("#workspace-chat-input");
-  if (input) input.disabled = !available;
+  const composerEnabled = available || input?.form?.hasAttribute("data-public-link-form");
+  if (input) input.disabled = !composerEnabled;
   const send = document.querySelector("[data-workspace-chat-send]");
-  if (send) { send.disabled = !available || chatPending || !homeDraft.trim(); send.innerHTML = chatPending ? '<span class="sr-only">正在打开对话</span>…' : icon("up"); }
+  if (send) { send.disabled = !composerEnabled || chatPending || !homeDraft.trim(); send.innerHTML = chatPending ? '<span class="sr-only">正在打开对话</span>…' : icon("up"); }
   document.querySelectorAll('[data-workspace-chat-prompt], [data-workspace-action="chat"]').forEach(button => { button.disabled = !available || chatPending; });
   const feedback = document.querySelector("[data-workspace-chat-feedback]");
   if (feedback) { feedback.hidden = !chatFeedback; feedback.textContent = chatFeedback; }
@@ -695,16 +722,15 @@ function sourceLinkKey(value) {
 }
 
 function openPublicLink(form, callbacks) {
-  const input = form.elements.namedItem("source");
-  const feedback = form.querySelector("#public-link-feedback");
-  const key = sourceLinkKey(input.value);
+  if (chatComposing) return;
+  homeDraft = form.elements.namedItem("source").value;
+  const key = sourceLinkKey(homeDraft);
   const collection = key && callbacks.state().collections.find(item => sourceLinkKey(item.url) === key);
-  if (!collection) {
-    feedback.textContent = "示例库里没有这个链接。可从收藏或展览复制一个来源链接再试。";
-    return;
-  }
-  feedback.textContent = "已找到对应收藏。";
-  callbacks.openCollection(collection.id);
+  chatFeedback = collection ? "已找到对应收藏。"
+    : key ? "示例库里没有这个链接。也可以用「引用收藏」选择。"
+    : "请输入以 https:// 或 http:// 开头的示例收藏链接。";
+  updateHomeChatControls();
+  if (collection) callbacks.openCollection(collection.id);
 }
 
 export function bindWorkspace(callbacks) {
@@ -814,6 +840,12 @@ export function bindWorkspace(callbacks) {
     }
     if (action === "clear-chat-context") { homeContextIds = []; callbacks.render(); document.querySelector("#workspace-chat-input")?.focus(); return; }
     if (action === "choose-chat-context") { showChatContext(callbacks, target); return; }
+    if (action === "public-continue-chat") {
+      const openSampleConversation = window.__FORME_DESKTOP__?.openSampleConversation;
+      if (openSampleConversation) openSampleConversation();
+      else callbacks.capture();
+      return;
+    }
     if (action === "clear-filters") { preferences.query = ""; preferences.filter = "all"; preferences.theme = ""; preferences.recent = false; callbacks.render(); }
     if (action === "clear-theme") { preferences.theme = ""; callbacks.render(); }
     if (action === "new-note") showNote({ blocks: [] }, "new", callbacks);

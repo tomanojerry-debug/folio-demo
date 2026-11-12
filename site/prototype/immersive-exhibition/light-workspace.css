@@ -230,7 +230,7 @@ html[data-presentation="light"] dialog.ws-chat-context-dialog { width: min(540px
 .ws-chat-context-dialog>p { margin: 9px 0 0; color: var(--ws-muted); font: 12px/1.8 var(--ws-font); }
 .ws-chat-context-list { display: flex; flex-direction: column; min-width: 0; margin-top: 19px; }
 .ws-chat-context-list label { display: flex; align-items: flex-start; gap: 10px; min-width: 0; padding: 12px 1px; border-top: 1px solid var(--ws-line); color: var(--ws-ink); font: 13px/1.7 var(--ws-font); cursor: pointer; }
-.ws-chat-context-list label>input[type="checkbox"] { flex: 0 0 15px; width: 15px; height: 15px; margin: 4px 0 0; accent-color: #dce2e7; }
+.ws-chat-context-list label>input:is([type="checkbox"],[type="radio"]) { flex: 0 0 15px; width: 15px; height: 15px; margin: 4px 0 0; accent-color: #dce2e7; }
 .ws-chat-context-list label>span { display: block; flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .ws-chat-context-list :is(strong,b) { display: block; font: 500 13px/1.65 var(--ws-font); }
 .ws-chat-context-list :is(small,.ws-chat-context-source) { display: block; margin-top: 3px; color: var(--ws-muted); font: 11px/1.6 var(--ws-font); overflow-wrap: anywhere; }
@@ -437,18 +437,3 @@ html[data-presentation="light"][data-reduce-motion="true"] :is(.ws-sidebar,.ws-w
   .ws-sidebar-footer > :is(.ws-button,.ws-icon-button) { justify-content: center; width: 100%; padding-inline: 0; }
   .ws-sidebar-footer > .ws-button > span { display: none; }
 }
-
-[data-home-section="home"] .ws-public-sample {
-  min-height: 108px;
-  padding: 14px 16px;
-}
-.ws-public-link-row, .ws-public-sample-tools {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.ws-public-link-row input { flex: 1 1 auto; min-width: 0; }
-.ws-public-sample-tools { flex-wrap: wrap; gap: 6px 14px; color: var(--ws-muted); }
-.ws-public-sample-tools a { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.ws-public-sample-tools a svg { width: 15px; height: 15px; }

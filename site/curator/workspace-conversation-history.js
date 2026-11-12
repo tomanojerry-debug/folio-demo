@@ -53,7 +53,7 @@ const icons = {
  * Mount once in the shared workspace sidebar. The caller owns persistence,
  * navigation and creation; rendering this component never creates a chat.
  */
-export function mountWorkspaceConversationHistory({ root, getState, getActiveId, onSelect, onNew }) {
+export function mountWorkspaceConversationHistory({ root, getState, getActiveId, onSelect, onNew, emptyText = '从一个问题开始' }) {
   if (!root?.ownerDocument || typeof getState !== 'function') throw new TypeError('A history root and state reader are required.');
   const document = root.ownerDocument;
   const window = document.defaultView || globalThis;
@@ -160,7 +160,7 @@ export function mountWorkspaceConversationHistory({ root, getState, getActiveId,
     signature = next;
     const focusedId = list.contains(document.activeElement) ? document.activeElement?.dataset.wsConversation : null;
     const items = page.groups.flatMap(group => group.conversations);
-    list.innerHTML = items.length ? `<ul>${items.map(item => `<li><button type="button" class="ws-history-row${item.id === activeId ? ' is-current' : ''}" data-ws-conversation="${escape(item.id)}"${item.id === activeId ? ' aria-current="page"' : ''} title="${escape(item.title)}"><span>${escape(item.title)}</span>${item.working ? '<i class="ws-history-state is-working" aria-hidden="true"></i><span class="ws-history-visually-hidden">处理中</span>' : item.failed ? '<i class="ws-history-state is-failed" aria-hidden="true"></i><span class="ws-history-visually-hidden">处理未完成</span>' : ''}</button></li>`).join('')}</ul>` : `<p class="ws-history-empty">${query.trim() ? '没有匹配的对话' : '从一个问题开始'}</p>`;
+    list.innerHTML = items.length ? `<ul>${items.map(item => `<li><button type="button" class="ws-history-row${item.id === activeId ? ' is-current' : ''}" data-ws-conversation="${escape(item.id)}"${item.id === activeId ? ' aria-current="page"' : ''} title="${escape(item.title)}"><span>${escape(item.title)}</span>${item.working ? '<i class="ws-history-state is-working" aria-hidden="true"></i><span class="ws-history-visually-hidden">处理中</span>' : item.failed ? '<i class="ws-history-state is-failed" aria-hidden="true"></i><span class="ws-history-visually-hidden">处理未完成</span>' : ''}</button></li>`).join('')}</ul>` : `<p class="ws-history-empty">${query.trim() ? '没有匹配的对话' : escape(emptyText)}</p>`;
     const nextCount = Math.min(PAGE_SIZE,page.total - page.visibleCount);
     more.hidden = !page.hasMore;
     more.querySelector('small').textContent = `+${nextCount}`;

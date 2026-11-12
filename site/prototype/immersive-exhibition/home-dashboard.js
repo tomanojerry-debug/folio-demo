@@ -87,10 +87,30 @@ function renderRecommendationSection({ kind, title, cards, empty, destination, l
   return `<section class="ws-desk-recommendations" aria-labelledby="${headingId}"><h2 class="ws-desk-section-label" id="${headingId}">${title}</h2>${content}</section>`;
 }
 
-function renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable }) {
+function renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable, publicLinks }) {
   const selected = [...new Set(contextIds)].map(id => s.collections.find(item => item.id === id)).filter(Boolean).slice(0, 6);
   const references = selected.length ? `<div class="ws-desk-chat-references" aria-label="本次引用的收藏">${selected.map(item => `<span class="ws-desk-chat-reference" aria-label="${escape(item.title)}" data-tooltip="${escape(item.title)}">${icon("inbox")}<span>${escape(item.title)}</span></span>`).join("")}<button type="button" class="ws-desk-chat-clear" data-workspace-action="clear-chat-context" aria-label="清除本次收藏引用">${icon("close")}</button></div>` : "";
-  return `<section class="ws-desk-chat" aria-label="和 Tag 对话"><form data-workspace-chat-form><label class="sr-only" for="workspace-chat-input">向 Tag 提问</label><div class="ws-desk-composer">${references}<textarea id="workspace-chat-input" class="textarea" name="message" rows="2" maxlength="12000" placeholder="交给 Tag 一个问题，或一件想完成的事…" aria-describedby="ws-chat-keyboard ws-chat-feedback"${chatAvailable ? "" : " disabled"}>${escape(draft)}</textarea><div class="ws-desk-chat-toolbar"><div class="ws-desk-chat-tools"><button type="button" class="ws-desk-context-button" data-workspace-action="choose-chat-context" aria-label="引用收藏${selected.length ? `，已选 ${selected.length} 件` : ""}"${chatAvailable && s.collections.length ? "" : " disabled"}>${icon("plus")}<span>引用收藏${selected.length ? ` · ${selected.length}` : ""}</span></button></div><button type="button" class="ws-desk-chat-history" data-workspace-action="chat"${chatAvailable ? "" : " disabled"}>继续对话${icon("chat")}</button><button type="submit" class="ws-desk-send" data-workspace-chat-send aria-label="发送给 Tag"${!chatAvailable || !draft.trim() || pending ? " disabled" : ""}>${pending ? '<span class="sr-only">正在打开对话</span>…' : icon("up")}</button></div></div><p id="ws-chat-keyboard" class="sr-only">${chatHint}</p></form><p id="ws-chat-feedback" class="ws-chat-feedback" data-workspace-chat-feedback role="status"${feedback ? "" : " hidden"}>${escape(feedback)}</p>${!chatAvailable || s.desktopCapabilities?.aiEnabled === false ? `<p class="ws-desk-chat-note">${chatHint}</p>` : ""}</section>`;
+  const composerEnabled = publicLinks || chatAvailable;
+  const inputAttributes = publicLinks
+    ? 'name="source" inputmode="url" maxlength="2048" placeholder="粘贴示例收藏的来源链接，交给 Tag 查看…"'
+    : 'name="message" maxlength="12000" placeholder="交给 Tag 一个问题，或一件想完成的事…"';
+  return `<section class="ws-desk-chat" aria-label="${publicLinks ? "用 Tag 查看链接" : "和 Tag 对话"}">
+    <form ${publicLinks ? "data-public-link-form" : "data-workspace-chat-form"}>
+      <label class="sr-only" for="workspace-chat-input">${publicLinks ? "交给 Tag 一个示例来源链接" : "向 Tag 提问"}</label>
+      <div class="ws-desk-composer">
+        ${references}
+        <textarea id="workspace-chat-input" class="textarea" rows="2" ${inputAttributes} aria-describedby="ws-chat-keyboard ws-chat-feedback"${composerEnabled ? "" : " disabled"}>${escape(draft)}</textarea>
+        <div class="ws-desk-chat-toolbar">
+          <div class="ws-desk-chat-tools"><button type="button" class="ws-desk-context-button" data-workspace-action="choose-chat-context" aria-label="引用收藏${selected.length ? `，已选 ${selected.length} 件` : ""}"${composerEnabled && s.collections.length ? "" : " disabled"}>${icon("plus")}<span>引用收藏${selected.length ? ` · ${selected.length}` : ""}</span></button></div>
+          <button type="button" class="ws-desk-chat-history" data-workspace-action="${publicLinks ? "public-continue-chat" : "chat"}"${composerEnabled ? "" : " disabled"}>继续对话${icon("chat")}</button>
+          <button type="submit" class="ws-desk-send" data-workspace-chat-send aria-label="${publicLinks ? "让 Tag 查看链接" : "发送给 Tag"}"${!composerEnabled || !draft.trim() || pending ? " disabled" : ""}>${pending ? '<span class="sr-only">正在打开对话</span>…' : icon("up")}</button>
+        </div>
+      </div>
+      <p id="ws-chat-keyboard" class="sr-only">${chatHint}</p>
+    </form>
+    <p id="ws-chat-feedback" class="ws-chat-feedback" data-workspace-chat-feedback role="status"${feedback ? "" : " hidden"}>${escape(feedback)}</p>
+    ${publicLinks || !chatAvailable || s.desktopCapabilities?.aiEnabled === false ? `<p class="ws-desk-chat-note">${chatHint}</p>` : ""}
+  </section>`;
 }
 
 export function renderHomeDashboard(s, galleryItems, {
@@ -103,7 +123,9 @@ export function renderHomeDashboard(s, galleryItems, {
   const tag = '<span class="tag-name">Tag</span>';
   const title = model.output ? `${tag} 为你准备好了` : model.working.length ? `${tag} 正在为你整理` : `和 ${tag}，留下一点喜欢`;
   const capabilities = s.desktopCapabilities;
-  const chatHint = !chatAvailable ? "桌面伙伴对话可在 Folio 客户端中使用"
+  const publicLinks = Boolean(capabilities?.publicDemo && sampleURL);
+  const chatHint = publicLinks ? "Tag 可以打开示例库中的来源链接，按回车查看。"
+    : !chatAvailable ? "桌面伙伴对话可在 Folio 客户端中使用"
     : capabilities?.demoAccount ? "当前是演示模式。智能对话请使用 Folio 的个人模式。"
     : capabilities?.aiEnabled === false ? "智能对话尚未配置；原始收藏仍会保留。"
     : "回车发送，Shift + 回车换行。";
@@ -117,11 +139,8 @@ export function renderHomeDashboard(s, galleryItems, {
     kind: "collections", title: "推荐收藏", destination: "inbox", link: "查看我的收藏", empty: "还没有可推荐的收藏。", icon,
     cards: model.recommendations.map((recommendation, index) => renderCollectionCard(recommendation, index)),
   });
-  const publicSample = capabilities?.publicDemo && sampleURL;
-  const capture = publicSample ? "" : `<button type="button" class="ws-button ws-desk-capture" data-action="toggle-capture">${icon("plus")}收新</button>`;
-  const composer = publicSample
-    ? `<section class="ws-desk-chat" aria-label="用 Tag 查看链接"><form data-public-link-form><div class="ws-desk-composer ws-public-sample"><label class="sr-only" for="public-source-link">交给 Tag 一个示例来源链接</label><div class="ws-public-link-row"><input class="input" id="public-source-link" name="source" type="url" placeholder="粘贴示例展览里的来源链接…" maxlength="2048" required aria-describedby="public-link-feedback"><button type="submit" class="ws-desk-send" aria-label="让 Tag 查看链接">${icon("up")}</button></div><div class="ws-public-sample-tools"><span id="public-link-feedback" role="status">Tag 可以打开示例库中的来源。</span><a class="ws-button" href="${escape(sampleURL)}">试用模型整理${icon("arrow")}</a></div></div></form></section>`
-    : renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable });
-  const footer = publicSample ? "" : `<footer class="ws-desk-footer"><span>来自你的收藏</span><span>${icon("check")}你的收藏，始终属于你</span></footer>`;
+  const capture = `<button type="button" class="ws-button ws-desk-capture" data-action="toggle-capture">${icon("plus")}收新</button>`;
+  const composer = renderHomeComposer(s, { icon, draft, pending, feedback, contextIds, chatHint, chatAvailable, publicLinks });
+  const footer = `<footer class="ws-desk-footer"><span>${publicLinks ? "来自示例收藏" : "来自你的收藏"}</span><span>${icon("check")}${publicLinks ? "新增内容保存在当前浏览器" : "你的收藏，始终属于你"}</span></footer>`;
   return `<header class="ws-desk-intro"><div><p class="ws-desk-date">${today}</p><h1>${title}</h1></div>${capture}</header>${composer}${exhibitions}${recommendations}${working}${footer}`;
 }
