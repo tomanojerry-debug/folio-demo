@@ -74,10 +74,11 @@ export function createReadingSettingsController({ api, onChange = () => {} }) {
   };
 }
 
-function renderExhibitPreference(mode) {
+function renderExhibitPreference(mode, publicDemo) {
   const options = modes => Object.entries(modes).map(([id, { label }]) => `<option value="${id}" ${id === mode ? 'selected' : ''}>${escape(label)}</option>`).join('');
+  const help = publicDemo ? '选择打开示例展览时默认使用的读法。展览会直接显示已准备好的读稿。' : '选择打开个人展览时默认使用的读法。已有读稿会直接打开。有可用原文和已配置的模型时，预设会自动生成尚未保存的读稿，生成时会把本展的原文片段发送给模型。';
   return `<section class="forme-reading-settings-section">
-    <h3>展览读法</h3><p id="forme-reading-settings-exhibit-help">选择打开个人展览时默认使用的读法。已有读稿会直接打开。有可用原文和已配置的模型时，预设会自动生成尚未保存的读稿，生成时会把本展的原文片段发送给模型。</p>
+    <h3>展览读法</h3><p id="forme-reading-settings-exhibit-help">${help}</p>
     <label for="forme-reading-settings-exhibit-mode">默认读法</label>
     <div class="forme-reading-settings-select">
       <select class="input" id="forme-reading-settings-exhibit-mode" data-reading-settings-field="curationMode" aria-describedby="forme-reading-settings-exhibit-help">
@@ -88,14 +89,14 @@ function renderExhibitPreference(mode) {
   </section>`;
 }
 
-export function renderReadingSettings(state) {
+export function renderReadingSettings(state, { publicDemo = false } = {}) {
   if (state.status === 'loading') return '<p class="forme-reading-settings-status" role="status">正在读取阅读设置…</p>';
   if (state.status === 'error') return `<p class="forme-reading-settings-error" role="alert">${escape(state.error)}</p><button type="button" class="btn ws-button" data-variant="outline" data-size="sm" data-reading-settings-action="reload">重新加载</button>`;
   if (!state.saved) return '';
   const draft = state.draft, saving = state.status === 'saving';
   return `<form data-reading-settings-form><fieldset ${saving ? 'disabled' : ''}>
     <section class="forme-reading-settings-section"><h3>收藏读法</h3><p>选择打开收藏时默认显示的阅读方式。</p><div class="forme-reading-settings-modes" role="radiogroup" aria-label="默认阅读方式">${Object.entries(articleReadingModes).map(([mode, label]) => `<label class="forme-reading-settings-mode"><input type="radio" name="defaultMode" value="${mode}" data-reading-settings-field="defaultMode" ${draft.defaultMode === mode ? 'checked' : ''}><span><b>${label}</b><small>${descriptions[mode]}</small></span></label>`).join('')}</div></section>
-    ${renderExhibitPreference(draft.curationMode)}
+    ${renderExhibitPreference(draft.curationMode, publicDemo)}
     <section class="forme-reading-settings-section">
       <h3>阅读显示</h3>
       <div class="forme-reading-settings-display">
@@ -117,18 +118,18 @@ export function renderReadingSettings(state) {
           </div>
         </div>
       </div>
-      <div class="forme-reading-settings-sample" style="--settings-font-size:${Number.isInteger(draft.fontSize) && draft.fontSize >= 14 && draft.fontSize <= 24 ? draft.fontSize : 17}px;--settings-reading-width:${draft.readingWidth === 'wide' ? '100%' : '26em'}"><p>偏好保存在这台电脑，可随时修改。</p></div>
+      <div class="forme-reading-settings-sample" style="--settings-font-size:${Number.isInteger(draft.fontSize) && draft.fontSize >= 14 && draft.fontSize <= 24 ? draft.fontSize : 17}px;--settings-reading-width:${draft.readingWidth === 'wide' ? '100%' : '26em'}"><p>偏好保存在${publicDemo ? '当前浏览器' : '这台电脑'}，可随时修改。</p></div>
     </section></fieldset>${state.error ? `<p class="forme-reading-settings-error" role="alert">${escape(state.error)}</p>` : ''}${state.notice ? `<p class="forme-reading-settings-status" role="status">${escape(state.notice)}</p>` : ''}${state.conflict ? '<p class="forme-reading-settings-hint">载入最新设置会替换当前草稿。</p>' : ''}<footer class="forme-reading-settings-actions"><button type="button" class="btn ws-button" data-variant="ghost" data-size="sm" data-reading-settings-action="reload" ${saving ? 'disabled' : ''}>${state.conflict ? '载入最新设置' : '重新加载'}</button><div><button type="button" class="btn ws-button" data-variant="ghost" data-size="sm" data-reading-settings-action="close">关闭</button><button type="submit" class="btn ws-button" data-variant="primary" data-size="sm" ${saving || !state.dirty ? 'disabled' : ''}>${saving ? '正在保存…' : '保存设置'}</button></div></footer></form>`;
 }
 
 /** One global Settings surface, launched from the existing workspace navigation. */
-export function mountReadingSettings({ api, document:doc = globalThis.document } = {}) {
+export function mountReadingSettings({ api, document:doc = globalThis.document, publicDemo = false } = {}) {
   let dialog = null, body = null, trigger = null, destroyed = false;
   function paint(state) {
     if (!body || !dialog?.isConnected) return;
     const active = doc.activeElement;
     const focused = body.contains(active) ? { field:active.dataset?.readingSettingsField, value:active.value, start:active.selectionStart, end:active.selectionEnd } : null;
-    body.innerHTML = renderReadingSettings(state);
+    body.innerHTML = renderReadingSettings(state, { publicDemo });
     if (focused?.field && !['loading', 'saving'].includes(state.status)) {
       const target = [...body.querySelectorAll('[data-reading-settings-field]')].find(element => element.dataset.readingSettingsField === focused.field && (element.type !== 'radio' || element.value === focused.value));
       target?.focus({ preventScroll:true });

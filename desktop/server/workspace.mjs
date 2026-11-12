@@ -1,11 +1,14 @@
 const rowFields = {
   exhibitionNotes: ["id", "kind", "content", "image", "images", "comment", "exhibitId", "exhibitTitle", "exhibitionId", "exhibitionTitle", "chapter", "chapterTitle", "source", "createdAt", "updatedAt"],
   exhibitionRecords: ["id", "exhibitionId", "exhibitionTitle", "createdAt", "updatedAt", "content", "images"],
-  studioNotes: ["id", "exhibitionId", "exhibitionTitle", "title", "status", "cover", "updatedAt", "citations", "readingSource", "blocks", "body", "createdAt"],
+  studioNotes: ["id", "exhibitionId", "exhibitionTitle", "title", "status", "cover", "updatedAt", "citations", "readingSource", "captureSource", "attachments", "blocks", "body", "createdAt"],
   themes: ["id", "title", "status", "evidenceCount", "exhibitionId", "noteId"],
   exhibitionProgress: ["id", "status", "viewed", "revealed", "completed", "recommendationDecision"],
 };
 const feedbackFields = ["decision", "userSelected", "originalSummary", "acceptedSummary", "correctionPrompt", "reviewedAt", "revision", "acceptedTags", "tagsReviewedAt", "dismissed", "kept", "updatedAt", "value", "disputed", "correction"];
+const captureFields = ["kind", "surface", "collectionId", "exhibitionId", "documentVersionId", "paragraphId", "offset", "text", "imageUrl", "title", "url"];
+const captureIdentityFields = ["collectionId", "exhibitionId", "documentVersionId", "paragraphId"];
+const noteImageBudget = 2_500_000;
 const invalid = () => Object.assign(new Error("只能保存个人备注、反馈和阅读记录，不能覆盖 AI 内容或处理任务。"), { code: "INVALID_WORKSPACE_PATCH", statusCode: 400 });
 const safeKey = (key) => typeof key === "string" && key.length > 0 && key.length <= 300 && !["__proto__", "prototype", "constructor"].includes(key);
 function safeJSON(value, depth = 0) {
@@ -16,6 +19,55 @@ function safeJSON(value, depth = 0) {
   if (Array.isArray(value)) { if (value.length > 1000) throw invalid(); value.forEach((item) => safeJSON(item, depth + 1)); return; }
   if (!value || typeof value !== "object" || Object.getPrototypeOf(value) !== Object.prototype) throw invalid();
   for (const [key, item] of Object.entries(value)) { if (!safeKey(key)) throw invalid(); safeJSON(item, depth + 1); }
+}
+
+const boundedText = (value, maximum) => typeof value === "string" && value.length <= maximum && Boolean(value.trim());
+
+function validWebUrl(value) {
+  if (typeof value !== "string" || value.length > 4000 || !/^https?:\/\//iu.test(value) || /[\x00-\x1f\x7f]/u.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return Boolean(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function validImageData(value) {
+  if (typeof value !== "string" || value.length > noteImageBudget) return false;
+  const header = /^data:image\/(?:jpeg|png|webp);base64,/u.exec(value);
+  if (!header) return false;
+  const payload = value.slice(header[0].length);
+  return payload.length % 4 === 0 && payload === payload.trimEnd() && /^[A-Za-z0-9+/]+={0,2}$/u.test(payload);
+}
+
+function validCapturedImage(value) {
+  if (typeof value !== "string") return false;
+  if (value.startsWith("data:")) return validImageData(value);
+  if (validWebUrl(value)) return true;
+  if (value.length > 4000 || value !== value.trimEnd()) return false;
+  if (/^\/api\/desktop\/covers\/[a-f0-9]{64}$/u.test(value)) return true;
+  // Only the desktop's known raster asset routes may be saved as local image paths.
+  return /^(?:\/prototype\/(?:immersive-exhibition|folio-reader)\/|\/curator\/|\/|\.\/)assets\/[\w./-]+\.(?:jpe?g|png|webp|gif|avif)$/iu.test(value)
+    && !value.split("/").includes("..");
+}
+
+function validateStudioNote(note) {
+  const source = note.captureSource;
+  if (source !== undefined) {
+    if (!source || Array.isArray(source) || typeof source !== "object" || Object.keys(source).some(key => !captureFields.includes(key))) throw invalid();
+    if (!["collection", "exhibition"].includes(source.surface) || !["text", "image"].includes(source.kind)) throw invalid();
+    if (!source[`${source.surface}Id`] || !boundedText(source.title, 300)) throw invalid();
+    if (captureIdentityFields.some(key => source[key] !== undefined && !boundedText(source[key], 300))) throw invalid();
+    if (source.offset !== undefined && (!Number.isSafeInteger(source.offset) || source.offset < 0)) throw invalid();
+    if (source.url !== undefined && !validWebUrl(source.url)) throw invalid();
+    if ((source.kind === "text" || source.text !== undefined) && !boundedText(source.text, 12000)) throw invalid();
+    if ((source.kind === "image" || source.imageUrl !== undefined) && !validCapturedImage(source.imageUrl)) throw invalid();
+  }
+  const attachments = note.attachments;
+  if (attachments !== undefined && (!Array.isArray(attachments) || attachments.length > 3 || !attachments.every(validImageData))) throw invalid();
+  const sourceImageSize = source?.imageUrl?.startsWith("data:") ? source.imageUrl.length : 0;
+  if ((attachments || []).reduce((size, image) => size + image.length, sourceImageSize) > noteImageBudget) throw invalid();
 }
 
 export function emptyWorkspace() {
@@ -38,6 +90,7 @@ export function applyWorkspacePatch(state, body) {
       else workspace[op.field][op.key] = structuredClone(op.value);
     } else if (Object.hasOwn(rowFields, op.field)) {
       if (!op.delete && (!op.value || typeof op.value !== "object" || Array.isArray(op.value) || op.value.id !== op.key || Object.keys(op.value).some((key) => !rowFields[op.field].includes(key)))) throw invalid();
+      if (!op.delete && op.field === "studioNotes") validateStudioNote(op.value);
       const rows = workspace[op.field] ||= [];
       const index = rows.findIndex((row) => row.id === op.key);
       if (op.delete) { if (index >= 0) rows.splice(index, 1); }

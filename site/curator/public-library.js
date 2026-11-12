@@ -81,7 +81,7 @@ export function createPublicLibrary(payload, storage) {
   }
 
   const saved = savedData(storage);
-  const workspace = Object.fromEntries([
+  let workspace = Object.fromEntries([
     ...mapFields.map(field => [field, object(saved.workspace?.[field]) ? saved.workspace[field] : clone(state.workspace?.[field] || {})]),
     ...rowFields.map(field => [field, clone(list(saved.workspace?.[field] ?? state.workspace?.[field]))]),
   ]);
@@ -98,15 +98,43 @@ export function createPublicLibrary(payload, storage) {
       title: sample.collection.title,
       createdAt: sample.collection.addedAt,
     }] : [];
-    return clone({ ...state, collections, conversations, workspace });
+    const exhibitions = state.exhibitions.map(exhibition => {
+      const record = workspace.exhibitionRecords.find(item => item?.id === `record-${exhibition.id}` && item.exhibitionId === exhibition.id);
+      return record ? { ...exhibition, note: record.content, noteUpdatedAt: record.updatedAt } : exhibition;
+    });
+    return clone({ ...state, collections, conversations, exhibitions, workspace });
   };
-  const persist = () => saveData(storage, { workspace, preferences });
+  function persist(nextWorkspace = workspace, nextPreferences = preferences) {
+    if (!saveData(storage, { workspace: nextWorkspace, preferences: nextPreferences })) {
+      throw new Error("当前浏览器无法保存这次修改，请检查存储权限或可用空间。");
+    }
+    workspace = nextWorkspace;
+    preferences = nextPreferences;
+  }
 
   async function api(route, body = {}) {
     if (route === "state") return currentState();
     if (route === "workspace") {
-      applyWorkspaceOperations(workspace, body.ops);
-      persist();
+      const next = clone(workspace);
+      applyWorkspaceOperations(next, body.ops);
+      persist(next);
+      return { state: currentState() };
+    }
+    if (route === "notes") {
+      const exhibition = state.exhibitions.find(item => item.id === body.exhibitionId);
+      if (!exhibition) throw new Error("没有找到这场展览，请刷新后重试。");
+      const value = body.text === undefined ? "" : body.text;
+      if (typeof value !== "string" || value.length > 10000 || value.includes("\u0000")) throw new Error("想法格式不正确或内容过长。");
+      const content = value.trim();
+      const id = `record-${exhibition.id}`;
+      const previous = workspace.exhibitionRecords.find(item => item?.id === id);
+      const rest = workspace.exhibitionRecords.filter(item => item?.id !== id);
+      const now = new Date().toISOString();
+      const exhibitionRecords = content ? [{
+        ...previous, id, exhibitionId: exhibition.id, exhibitionTitle: exhibition.title, content,
+        createdAt: previous?.createdAt || now, updatedAt: now, images: previous?.images || [],
+      }, ...rest] : rest;
+      persist({ ...workspace, exhibitionRecords });
       return { state: currentState() };
     }
     if (route === "reading/preferences") {
@@ -115,8 +143,7 @@ export function createPublicLibrary(payload, storage) {
         if (body.expectedVersion !== undefined && body.expectedVersion !== preferences.version) {
           throw new Error("阅读设置已经更新，请重新打开设置。");
         }
-        preferences = { ...preferences, ...changes, version: preferences.version + 1 };
-        persist();
+        persist(workspace, { ...preferences, ...changes, version: preferences.version + 1 });
       }
       return { preferences: clone(preferences) };
     }

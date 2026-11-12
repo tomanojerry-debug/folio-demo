@@ -272,7 +272,8 @@ function renderUnderstanding(state) {
   const preview = originalPreview(article);
   if (!preview) return `<section class="forme-understanding-lead"><h2>原文尚未保存</h2>${coverageNote(article)}</section>`;
   const label = ({ image_description:'保存的图片描述', transcript:'字幕节选', reconstructed:'保存的证据片段' })[article.sourceKind] || '原文节选';
-  const unavailable = state.aiEnabled === false ? '智能整理尚未连接。' : '这篇收藏暂时无法生成解读。';
+  const unavailable = state.publicDemo ? '这条示例暂未提供可核对的解读。'
+    : state.aiEnabled === false ? '智能整理尚未连接。' : '这篇收藏暂时无法生成解读。';
   return `<div class="forme-understanding">
     <section class="forme-understanding-lead is-excerpt"><h2>${label}</h2>
       <blockquote class="forme-understanding-answer">${escape(preview.quote)}${preview.clipped ? '…' : ''}</blockquote>${passageLinks([preview])}</section>
@@ -294,7 +295,8 @@ function renderPlainReading(state) {
   const preview = [brief?.answer, ...list(brief?.findings)].map(entry => understandingPassage(article, entry)).filter(Boolean).slice(0, 3).join('');
   const body = preview ? `<div class="forme-understanding"><p class="forme-reading-eyebrow">解读要点 · 来自已有的 AI 解读</p>${preview}</div>`
     : canGenerate ? '<p class="forme-reading-hint">用更容易理解的语言重述原文，并解释必要的术语。</p>' : '';
-  const unavailable = hasSource && !canGenerate ? '<p class="forme-reading-hint">智能整理尚未连接。</p>' : '';
+  const unavailable = hasSource && !canGenerate
+    ? `<p class="forme-reading-hint">${state.publicDemo ? '这条示例暂未提供单独的通俗解读。' : '智能整理尚未连接。'}</p>` : '';
   return `${coverageNote(article)}${body}${generate}${unavailable}`;
 }
 function readingBody(state) {

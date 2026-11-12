@@ -49,3 +49,42 @@ test("Web Tag history lists a real sample result only in the browser that saved 
   assert.ok(saved.collections.some(item => item.id === saved.conversations[0].id));
   assert.deepEqual((await createPublicLibrary(catalog).api("state")).conversations, []);
 });
+
+test("browser storage failure leaves note and preference snapshots unchanged", async () => {
+  const storage = { getItem: () => null, setItem() { throw new Error("Quota exceeded"); } };
+  const catalog = await publicWorkspaceCatalog("/folio-demo");
+  const library = createPublicLibrary(catalog, storage);
+  await assert.rejects(library.api("workspace", {
+    ops: [{ field: "studioNotes", key: "sample-note", value: { id: "sample-note", body: "一条想法" } }],
+  }), /无法保存/);
+  await assert.rejects(library.api("reading/preferences", { fontSize: 20 }), /无法保存/);
+  assert.deepEqual((await library.api("state")).workspace.studioNotes, []);
+  assert.deepEqual((await library.api("reading/preferences")).preferences, catalog.preferences);
+});
+
+test("public exhibition reflections save, reopen and clear through the existing workspace records", async () => {
+  const entries = new Map();
+  const storage = { getItem: key => entries.get(key), setItem: (key, value) => entries.set(key, value) };
+  const catalog = await publicWorkspaceCatalog("/folio-demo");
+  const exhibitionId = catalog.state.exhibitions[0].id;
+  let library = createPublicLibrary(catalog, storage);
+  await assert.rejects(library.api("notes", { exhibitionId: "unknown", text: "待验证" }), /没有找到这场展览/u);
+  await assert.rejects(library.api("notes", { exhibitionId, text: null }), /格式不正确/u);
+  await assert.rejects(library.api("notes", { exhibitionId, text: "长".repeat(10001) }), /内容过长/u);
+  const saved = (await library.api("notes", { exhibitionId, text: "  一条示例观展想法。 " })).state;
+  assert.equal(saved.exhibitions[0].note, "一条示例观展想法。");
+  assert.equal(saved.workspace.exhibitionRecords[0].content, saved.exhibitions[0].note);
+  assert.equal(saved.workspace.exhibitionRecords[0].exhibitionId, exhibitionId);
+  assert.equal(catalog.state.exhibitions[0].note, undefined);
+
+  library = createPublicLibrary(catalog, storage);
+  assert.equal((await library.api("state")).exhibitions[0].note, saved.exhibitions[0].note);
+  assert.equal((await createPublicLibrary(catalog).api("state")).exhibitions[0].note, undefined);
+  const cleared = (await library.api("notes", { exhibitionId, text: "" })).state;
+  assert.equal(cleared.exhibitions[0].note, undefined);
+  assert.deepEqual(cleared.workspace.exhibitionRecords, []);
+
+  const readonly = createPublicLibrary(catalog, { getItem: storage.getItem, setItem: () => { throw new Error("QuotaExceededError"); } });
+  await assert.rejects(readonly.api("notes", { exhibitionId, text: "尚未写入" }), /无法保存/u);
+  assert.equal((await readonly.api("state")).exhibitions[0].note, undefined);
+});

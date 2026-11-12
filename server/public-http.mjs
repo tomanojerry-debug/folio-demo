@@ -17,18 +17,18 @@ const curatorModules = new Set([
   "article-original", "article-reading", "chat-launch", "collection-card-color", "collection-headline", "companion-avatar",
   "curation-mode-definitions", "curation-reading", "curation-story", "curation-theme", "desktop-legacy-bridge",
   "exhibition-row-layout", "glass-dialogs", "home-recommendation-scroll", "knowledge-panel", "public-library",
-  "reading-settings", "task-view", "video-capture-command",
+  "reading-note-capture", "reading-settings", "task-view", "video-capture-command",
   "workspace-chat-launch", "workspace-chat", "workspace-conversation-history", "workspace-conversation-shell",
 ]);
 const curatorStyles = new Set([
-  "article-reading", "companion-avatar", "curation-story", "glass-dialogs", "reading-settings", "task-progress", "ui-system",
+  "article-reading", "companion-avatar", "curation-story", "glass-dialogs", "reading-note-capture", "reading-settings", "task-progress", "ui-system",
   "workspace-conversation-history", "workspace-conversation-shell",
 ]);
 const workspaceModules = new Set([
   "app", "collection-recommendations", "extraction", "fixtures", "home-dashboard", "light-workspace",
-  "live-ai", "live-ai-request", "refresh-mode", "serendipity", "store",
+  "live-ai", "live-ai-request", "refresh-mode", "serendipity", "store", "thought-notes",
 ]);
-const workspaceStyles = new Set(["styles", "live-ai", "light", "light-workspace"]);
+const workspaceStyles = new Set(["styles", "live-ai", "light", "light-workspace", "thought-notes"]);
 const basecoat = new Set(["/vendor/basecoat/basecoat-scoped.css", "/vendor/basecoat/js/basecoat.min.js", "/vendor/basecoat/js/dropdown-menu.min.js"]);
 const contentTypes = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",

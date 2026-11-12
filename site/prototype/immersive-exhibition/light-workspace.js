@@ -1,3 +1,4 @@
+import { bindThoughtNotes, renderThoughtNotes } from "./thought-notes.js";
 // The desktop presentation uses the existing store and business actions.
 // Only browsing preferences live here; content continues through the desktop adapter.
 import { renderHomeDashboard } from "./home-dashboard.js?v=20261111-name-font";
@@ -133,14 +134,6 @@ function noteText(note) {
   return note.blocks ? note.blocks.map(b => b.text).join("\n") : [note.kind === "image" ? "" : note.content, note.comment].filter(Boolean).join("\n");
 }
 function noteImages(note) { return note.kind === "image" ? [note.content].filter(Boolean) : (note.images || []); }
-function noteCard(note) {
-  const isStudio = Boolean(note.blocks);
-  const content = noteText(note);
-  const images = noteImages(note);
-  const kind = isStudio ? "studio" : note.exhibitId ? "excerpt" : "thought";
-  const title = isStudio ? note.title : note.exhibitionTitle || "一条想法";
-  return `<article class="ws-note" ${itemAttributes({ ...note, title, summary: content, kind, date: note.updatedAt || note.createdAt })}><button type="button" class="ws-note-open" data-workspace-note="${escape(note.id)}" data-note-kind="${kind}" aria-label="阅读手记：${escape(title)}"><div class="ws-note-top"><span>${({ studio: "个人手记", excerpt: "观展摘录", thought: "观展随笔" })[kind]}</span><time>${date(note.updatedAt || note.createdAt)}</time></div>${images[0] ? `<img class="ws-note-media" src="${escape(images[0])}" alt="保存于手记的图片" loading="lazy"/>` : ""}<h2>${escape(title)}</h2>${content || !images.length ? `<p>${escape(content || "这篇手记还没有正文。")}</p>` : ""}<footer><span>${note.status === "draft" ? "草稿" : escape(note.readingSource?.title || note.exhibitTitle || "")}</span>${icon("arrow")}</footer></button></article>`;
-}
 
 function renderHome(s, galleryItems, artwork) {
   homeContextIds = homeContextIds.filter(id => s.collections.some(item => item.id === id));
@@ -160,7 +153,8 @@ export function renderWorkspace({ state: s, galleryItems = [], artwork = {} }) {
   if (page === "home") {
     content = renderHome(s, galleryItems, artwork);
   } else if (page === "inbox") {
-    content = `${heading(page, collections.length, button(s.desktopCapabilities?.publicDemo ? "试用整理" : "收新", "toggle-capture", { primary: true, glyph: "plus", attrs: 'aria-haspopup="dialog"' }))}${searchBar(page, "搜索收藏、关键词或来源")}${filterBar([["all", "全部"], ["image", "图片"], ["video", "视频"], ["link", "网页"], ["text", "文字"]])}${collections.length ? `<div class="ws-collection-grid" data-workspace-grid data-layout="${preferences.layout}">${collections.map((c, i) => collectionCard(c, s, artwork, i)).join("")}</div>${noResults()}` : emptyState("还没有收藏", "添加网页、文字或图片，开始建立自己的收藏。", `${button("添加收藏", "toggle-capture", { primary: true, glyph: "plus" })}`)}`;
+    const captureAttributes = s.desktopCapabilities?.publicDemo ? 'title="试用示例整理"' : 'aria-haspopup="dialog"';
+    content = `${heading(page, collections.length, button("收新", "toggle-capture", { primary: true, glyph: "plus", attrs: captureAttributes }))}${searchBar(page, "搜索收藏、关键词或来源")}${filterBar([["all", "全部"], ["image", "图片"], ["video", "视频"], ["link", "网页"], ["text", "文字"]])}${collections.length ? `<div class="ws-collection-grid" data-workspace-grid data-layout="${preferences.layout}">${collections.map((c, i) => collectionCard(c, s, artwork, i)).join("")}</div>${noResults()}` : emptyState("还没有收藏", "添加网页、文字或图片，开始建立自己的收藏。", `${button("添加收藏", "toggle-capture", { primary: true, glyph: "plus" })}`)}`;
   } else if (page === "gallery") {
     const curating = (s.workspaceJobs || []).some(job => job.type === "curate" && ["queued", "running"].includes(job.status));
     const emptyDescription = s.desktopCapabilities?.autoCurate ? "收藏的文章达到成卡条件后，专题会自动出现在这里。"
@@ -171,8 +165,7 @@ export function renderWorkspace({ state: s, galleryItems = [], artwork = {} }) {
       : emptyState("还没有个人展览", emptyDescription, `<a class="btn ws-button" href="#inbox" data-nav="inbox">逛逛我的收藏${icon("arrow")}</a>`);
     content = `${heading(page, galleryItems.length)}${searchBar(page, "搜索展览或主题")}${filterBar([["all", "全部"], ["showing", "正在展出"], ["unviewed", "尚未观看"], ["completed", "已看完"]])}${galleryItems.length ? `<div class="ws-exhibition-grid" data-workspace-grid data-layout="rows">${galleryItems.map((item, i) => exhibitionCard(item, i, s, artwork)).join("")}</div>${noResults()}` : galleryEmpty}`;
   } else {
-    const notes = [...(s.studioNotes || []), ...(s.exhibitionRecords || []), ...(s.exhibitionNotes || [])].sort((a, b) => compareDates(a.updatedAt || a.createdAt, b.updatedAt || b.createdAt));
-    content = `${heading(page, notes.length, button("写手记", "", { glyph: "plus", attrs: 'data-workspace-action="new-note"' }))}${searchBar(page, "搜索手记或摘录")}${filterBar([["all", "全部"], ["studio", "个人手记"], ["thought", "观展随笔"], ["excerpt", "观展摘录"]])}${notes.length ? `<div class="ws-notes-grid" data-workspace-grid>${notes.map(noteCard).join("")}</div>${noResults()}` : emptyState("还没有手记", "随时写下想法，或保存观展时的摘录。", button("写一篇手记", "", { primary: true, glyph: "plus", attrs: 'data-workspace-action="new-note"' }))}`;
+    content = renderThoughtNotes(s);
   }
   return `<div class="home-scroll ws-workspace"><section class="ws-page" data-home-section="${page}" aria-label="${pageLabels[page][0]}">${content}</section></div>`;
 }
@@ -207,7 +200,11 @@ export function syncShell(s, galleryItems = []) {
   mountCollectionLayout();
   sizeHomeComposer();
   const page = s.ui.lightPage || "home";
-  const counts = { inbox: s.collections.length, gallery: galleryItems.length, records: countNote(s) };
+  if (page === "records" && workspaceCallbacks) {
+    const callbacks = workspaceCallbacks;
+    bindThoughtNotes(document, { ...callbacks, getState: callbacks.state, editLegacyNote: note => showNote(note, "studio", callbacks) });
+  }
+  const counts =  { inbox: s.collections.length, gallery: galleryItems.length, records: countNote(s) };
   const nav = document.querySelector("[data-workspace-nav]");
   if (nav) {
     if (nav.children.length !== 4) nav.innerHTML = Object.entries(pageLabels).map(([key, [label]]) => `<a href="#${key === "records" ? "notes" : key === "home" ? "top" : key}" data-nav="${key}" aria-label="${label}">${icon(key)}<span>${label}</span>${key !== "home" ? `<b></b>` : ""}</a>`).join("");
@@ -402,6 +399,55 @@ const noteDrafts = new Map();
 const readingDraftIds = new Map();
 let workspaceCallbacks;
 
+export function syncNoteCount(s) {
+  const count = document.querySelector('[data-workspace-nav] [data-nav="records"] b');
+  if (count) count.textContent = countNote(s);
+}
+
+export function openCapturedThought(note, saveNote) {
+  const dialog = document.createElement("dialog");
+  const source = note.captureSource;
+  const image = storyImage(source.imageUrl);
+  dialog.className = "ws-note-dialog ws-quick-thought";
+  dialog.setAttribute("aria-labelledby", "ws-quick-thought-title");
+  dialog.innerHTML = `<form><header><h2 id="ws-quick-thought-title">补一句</h2><button type="button" class="btn ws-icon-button" aria-label="关闭">${icon("close")}</button></header><div class="ws-note-editor-body"><div class="ws-note-reading-reference">${source.kind === "text" ? `<blockquote>${escape(source.text)}</blockquote>` : image ? `<img src="${escape(image)}" alt="手记摘录图片" referrerpolicy="no-referrer"/>` : ""}<p class="ws-note-source">${escape(source.title)}</p></div><textarea class="textarea" id="ws-quick-thought-body" aria-label="我的想法" placeholder="写下此刻想到的…" rows="3" maxlength="12000">${escape(note.body || "")}</textarea><p class="ws-note-error" role="alert" hidden></p></div><footer><button type="submit" class="btn ws-button ws-button-primary">记下来</button></footer></form>`;
+  const form = dialog.querySelector("form");
+  const input = dialog.querySelector("textarea");
+  const close = dialog.querySelector('button[type="button"]');
+  const submit = dialog.querySelector('button[type="submit"]');
+  close.addEventListener("click", () => { void closeGlassDialog(dialog); });
+  dialog.addEventListener("close", () => dialog.remove(), { once: true });
+  form.addEventListener("keydown", event => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (submit.disabled) return;
+    const body = input.value.trim();
+    const error = form.querySelector("[role=alert]");
+    submit.disabled = true;
+    input.readOnly = true;
+    error.hidden = true;
+    try {
+      await saveNote({ ...note, body, blocks: body ? [{ type: "essay", ai: false, text: body }] : [], updatedAt: new Date().toISOString() });
+      await closeGlassDialog(dialog);
+    } catch (failure) {
+      error.textContent = failure.message || "暂时没有保存成功，可以重试。";
+      error.hidden = false;
+      input.readOnly = false;
+      input.focus();
+    } finally {
+      submit.disabled = false;
+    }
+  });
+  document.body.append(dialog);
+  dialog.showModal();
+  input.focus();
+}
+
 export function createReadingNote(payload, { id, now = new Date().toISOString() } = {}) {
   if (!payload?.collectionId || !payload.documentVersionId || !payload.source?.text) throw new Error("引用缺少原文位置，请重新打开这条收藏。");
   const source = payload.source;
@@ -524,7 +570,7 @@ function showNote(note, kind, callbacks) {
     submit.disabled = true; submit.textContent = "正在保存…";
     const id = stableNoteId;
     try {
-      await callbacks.saveNote({ ...note, id, title, blocks: nextBlocks, body: nextBlocks.map(block => block.text).join("\n\n"), status: "saved", updatedAt: new Date().toISOString() });
+      await (callbacks.saveLegacyNote || callbacks.saveNote)({ ...note, id, title, blocks: nextBlocks, body: nextBlocks.map(block => block.text).join("\n\n"), status: "saved", updatedAt: new Date().toISOString() });
       saved = true; noteDrafts.delete(draftKey);
       dialog.querySelector("[data-note-status]").textContent = "手记已保存";
       await closeGlassDialog(dialog);

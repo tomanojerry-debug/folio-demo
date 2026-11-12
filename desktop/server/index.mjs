@@ -19,6 +19,8 @@ const vendorRoot = path.join(projectRoot, "site/vendor/ogl/src");
 const controlsRoot = path.join(projectRoot, "site/vendor/basecoat");
 const controlsFiles = new Set(["basecoat-scoped.css", "js/basecoat.min.js", "js/dropdown-menu.min.js"]);
 const legacyFiles = new Set(["light.html", "light.css", "light-workspace.js", "home-dashboard.js", "collection-recommendations.js", "light-workspace.css", "app.js", "styles.css", "live-ai.css", "live-ai.js", "live-ai-request.js", "fixtures.js", "store.js", "gates.js", "extraction.js", "serendipity.js", "refresh-mode.js", "refresh-worker.js", "grainient.js", "text-pressure.js", "galaxy.js", "noomo3d.js", "inbox-scene3d.js", "elastic-mesh.js", "sample-registry.js", "public-hero.css", "bgm.js"]);
+legacyFiles.add("thought-notes.js");
+legacyFiles.add("thought-notes.css");
 const mime = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".otf": "font/otf", ".webm": "video/webm", ".mp4": "video/mp4", ".m4a": "audio/mp4" };
 
 function json(res, code, value) {

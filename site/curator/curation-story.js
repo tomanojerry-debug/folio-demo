@@ -200,6 +200,7 @@ export function mountCurationStory({ container, exhibition = {}, collections = [
   const root = container?.matches?.('.folio-curation-story') ? container : container?.querySelector?.('.folio-curation-story');
   if (!root) return { destroy() {}, refreshSources:async () => {} };
   mounted.get(root)?.destroy();
+  const publicDemo = root.ownerDocument.documentElement?.dataset?.publicWorkspace === 'true';
   const items = storyItems(exhibition, collections);
   const topic = exhibition.kind === 'local-topic' ? exhibition.curationReading : null;
   const pickerMenu = root.querySelector('[data-curation-model-menu]');
@@ -377,7 +378,9 @@ export function mountCurationStory({ container, exhibition = {}, collections = [
     let content;
     if (kind === 'media') content = items.filter(item => item.thumbnail).map(item => `<figure data-curation-media-id="${esc(item.id)}"><img src="${esc(item.thumbnail)}" alt="${esc(item.title)}"><figcaption>${esc(item.title)}<div>${button('open-collection', '打开收藏 ↗', `data-curation-item="${esc(item.id)}"`)}</div></figcaption></figure>`).join('') || '<p class="folio-story-empty">本展收藏暂时没有保存图片。</p>';
     else if (kind === 'quotes') content = sourceData.quotes.map((entry, index) => quoteHTML(entry, index, true)).join('') || '<p class="folio-story-empty">还没有可核对的原文摘录。</p>';
-    else if (kind === 'questions') content = sourceData.questions.map(questionHTML).join('') || '<p class="folio-story-empty">还没有保存的阅读问答。打开一篇收藏，可以根据它的原文提问。</p>';
+    else if (kind === 'questions') content = sourceData.questions.map(questionHTML).join('') || (publicDemo
+      ? '<p class="folio-story-empty">这场示例展览没有已保存的阅读问答。</p>'
+      : '<p class="folio-story-empty">还没有保存的阅读问答。打开一篇收藏，可以根据它的原文提问。</p>');
     else if (kind === 'source') {
       const entry = options.entry, url = safeURL(entry.article.url);
       content = `<p class="folio-story-eyebrow">${entry.article.sourceKind === 'image_description' ? '图片描述 · 已保存版本' : '原文语境 · 已保存版本'}</p><h3>${esc(entry.article.title)}</h3>${entry.note.source.paragraphs.map(paragraph => `<blockquote class="folio-story-source-context"><small>段落 ${esc(paragraph.id)}</small><p>${esc(paragraph.text)}</p></blockquote>`).join('')}<div class="folio-story-entry-actions">${button('open-collection', '打开完整收藏 ↗', `data-curation-item="${esc(entry.article.collectionId)}"`)}${url ? `<a class="btn ws-button" data-variant="ghost" data-size="sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer">访问原始来源${icon('external')}</a>` : ''}</div>`;

@@ -18,7 +18,7 @@ const collectionNoteDrafts = new Map();
 const DESKTOP_WORKSPACE = window.__FORME_DESKTOP__;
 const PRIVATE_WORKSPACE = Boolean(DESKTOP_WORKSPACE);
 const WORKSPACE_CHAT_AVAILABLE = typeof DESKTOP_WORKSPACE?.openChat === "function";
-const lightWorkspace = LIGHT_PRESENTATION ? await import("./light-workspace.js?v=20261111-cover-colors") : null;
+const lightWorkspace = LIGHT_PRESENTATION ? await import("./light-workspace.js?v=20261112-thought-notes") : null;
 const inactiveVisual = () => () => {};
 let mountGrainient = inactiveVisual, mountTextPressure = inactiveVisual;
 let mountGalaxy = inactiveVisual, mountNoomoScene = inactiveVisual, mountInboxScene3D = inactiveVisual, mountElasticMesh = inactiveVisual;
@@ -2414,9 +2414,9 @@ function folioCollectionDetail(item, ordered, tags, note, understandingState) {
   const sourceName = item.publisher || (external && item.source === "网页" ? external.hostname : item.source) || typeLabel(item.type);
   const mediaSource = ["image", "image_note", "video", "video_note"].includes(item.type);
   const thumbnail = cover ? `<img class="collection-briefing-cover" src="${escapeHtml(cover)}" alt="${mediaSource && item.type.startsWith("image") ? "收藏的图片" : ""}" decoding="async" referrerpolicy="no-referrer" />` : "";
-  const aiEnabled = state().desktopCapabilities?.aiEnabled;
-  const canRefresh = external && typeof liveAI.refreshSource === "function";
-  const canRetry = understandingState.canRetry && typeof liveAI.retry === "function";
+  const { aiEnabled, publicDemo } = state().desktopCapabilities || {};
+  const canRefresh = !publicDemo && external && typeof liveAI.refreshSource === "function";
+  const canRetry = !publicDemo && understandingState.canRetry && typeof liveAI.retry === "function";
   return collectionGlassFrame(item, ordered, `
     <header class="collection-briefing-header">
       <div class="collection-briefing-identity">
@@ -4509,9 +4509,9 @@ window.addEventListener("resize", () => {
 }, { passive: true });
 
 document.addEventListener("submit", async (event) => {
-  event.preventDefault();
   const form = event.target;
-  if (form.matches("[data-public-link-form]")) return;
+  if (!form.matches("form[data-form]")) return;
+  event.preventDefault();
   if (form.dataset.form === "collection-tag") {
     const tag = String(new FormData(form).get("tag") || "").trim();
     if (!tag) return;
@@ -4791,7 +4791,7 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     if (LIGHT_PRESENTATION) {
       if (document.querySelector("dialog[open], .collection-glass-overlay, .capture-overlay, .recap-ticket-overlay, .exhibit-detail-overlay")) return;
-      if (!document.getElementById("workspace-search")) switchLightPage(state().ui.lightPage === "home" ? "inbox" : state().ui.lightPage || "inbox");
+      if (!document.querySelector("#workspace-search, [data-thought-search]")) switchLightPage(state().ui.lightPage === "home" ? "inbox" : state().ui.lightPage || "inbox");
       lightWorkspace.focusWorkspaceSearch();
       return;
     }
@@ -5343,22 +5343,126 @@ const liveAIOptions = {
   openCollection: (id) => { navigate("collection", { collectionId: id, collectionFrom: "inbox" }); },
 };
 const liveAI = DESKTOP_WORKSPACE?.mountLiveAI?.(liveAIOptions) || DESKTOP_WORKSPACE?.liveAI || mountLiveAI(liveAIOptions);
+
+async function saveWorkspaceThought(note, { legacy = false } = {}) {
+  store.update(draft => {
+    const index = draft.studioNotes.findIndex(item => item.id === note.id);
+    if (index === -1) draft.studioNotes.unshift(note);
+    else draft.studioNotes[index] = note;
+    if (legacy && note.exhibitionId) ensureThemeForNote(draft, note);
+  });
+  await DESKTOP_WORKSPACE?.flushWorkspace?.({ retry: true });
+  lightWorkspace.syncNoteCount(state());
+}
+
+async function deleteWorkspaceThought(id) {
+  store.update(draft => { draft.studioNotes = draft.studioNotes.filter(note => note.id !== id); });
+  await DESKTOP_WORKSPACE?.flushWorkspace?.({ retry: true });
+  lightWorkspace.syncNoteCount(state());
+}
+
+function thoughtSource(note) {
+  if (note.captureSource) return note.captureSource;
+  const reading = note.readingSource;
+  if (reading?.collectionId) return {
+    ...reading, surface: "collection", offset: reading.paragraphs?.[0]?.start, paragraphId: reading.paragraphIds?.[0],
+  };
+  if (note.exhibitionId) return { surface: "exhibition", exhibitionId: note.exhibitionId };
+  return null;
+}
+
+async function openThoughtSource(note) {
+  const source = thoughtSource(note);
+  if (!source) throw new Error("这条手记没有关联的出处。");
+  if (await DESKTOP_WORKSPACE?.openNoteSource?.(source)) return;
+  if (!DESKTOP_WORKSPACE && source.collectionId && state().collections.some(item => item.id === source.collectionId)) {
+    liveAIOptions.openCollection(source.collectionId);
+    return;
+  }
+  if (!DESKTOP_WORKSPACE && source.exhibitionId) {
+    liveAI.show(source.exhibitionId);
+    return;
+  }
+  if (typeof source.url === "string" && /^https?:\/\//iu.test(source.url)) {
+    const native = window.webkit?.messageHandlers?.forme;
+    if (native) native.postMessage({ action: "openExternal", url: source.url });
+    else window.open(source.url, "_blank", "noopener,noreferrer");
+    return;
+  }
+  throw new Error("原收藏或展览暂时无法打开。");
+}
+
+async function askTagAboutThought(note) {
+  if (!DESKTOP_WORKSPACE?.openChat) throw new Error("可以在 Folio 桌面客户端里问 Tag。");
+  const source = thoughtSource(note);
+  const excerpt = note.captureSource?.text || note.readingSource?.text;
+  const body = note.body || note.blocks?.map(block => block.text).filter(Boolean).join("\n") || note.comment || (note.kind !== "image" && note.content) || "";
+  const context = [
+    source?.title && `出处　${source.title}`,
+    excerpt && `保存的片段\n${excerpt}`,
+    body && `手记正文\n${body}`,
+  ].filter(Boolean).join("\n\n");
+  const collectionIds = state().collections.some(item => item.id === source?.collectionId) ? [source.collectionId] : [];
+  const exhibitionId = state().liveExhibitions?.find(item => item.id === source?.exhibitionId)?.id;
+  const result = await DESKTOP_WORKSPACE.openChat({
+    message: `我想继续想一想这条手记。有什么问题值得接着问？${context ? `\n\n${context.slice(0, 24000)}` : ""}`,
+    collectionIds, ...(exhibitionId && { exhibitionId }), submit: false,
+  });
+  if (!result?.accepted) throw new Error(result?.error || "暂时无法打开 Tag 的对话。");
+}
+
+function captureSourceKey(source) {
+  return JSON.stringify([
+    source.surface, source.collectionId, source.exhibitionId, source.documentVersionId,
+    source.kind, source.kind === "image" ? source.imageUrl : [source.paragraphId, source.offset, source.text],
+  ]);
+}
+
+async function captureWorkspaceThought({ source }) {
+  const key = captureSourceKey(source);
+  const existing = state().studioNotes.find(note => note.captureSource && captureSourceKey(note.captureSource) === key);
+  if (existing) {
+    await DESKTOP_WORKSPACE?.flushWorkspace?.({ retry: true });
+    lightWorkspace.syncNoteCount(state());
+    return { id: existing.id, duplicate: true };
+  }
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  await saveWorkspaceThought({ id, captureSource: source, body: "", blocks: [], status: "saved", createdAt: now, updatedAt: now });
+  return { id };
+}
+
+function bindThoughtEvent(name, action) {
+  window.addEventListener(name, event => {
+    const detail = event.detail;
+    if (!detail || typeof detail.resolve !== "function" || typeof detail.reject !== "function") return;
+    Promise.resolve().then(() => action(detail)).then(detail.resolve, detail.reject);
+  });
+}
+
+if (LIGHT_PRESENTATION) {
+  bindThoughtEvent("folio:capture-note", captureWorkspaceThought);
+  bindThoughtEvent("folio:edit-note", ({ id }) => {
+    const note = state().studioNotes.find(item => item.id === id);
+    if (!note?.captureSource) throw new Error("找不到这条手记。");
+    lightWorkspace.openCapturedThought(note, saveWorkspaceThought);
+  });
+  bindThoughtEvent("folio:delete-note", ({ id }) => deleteWorkspaceThought(id));
+}
+
 if (LIGHT_PRESENTATION) lightWorkspace.bindWorkspace({
   state,
   render: () => collectionLiveModal ? refreshCollectionView() : render(),
   galleryItems: galleryArchiveItems,
-  openCollection: liveAIOptions.openCollection,
   collectionCoverColor: DESKTOP_WORKSPACE?.collectionCoverColor,
+  openCollection: liveAIOptions.openCollection,
   navigate: switchLightPage,
   capture: openCaptureOverlay,
-  async saveNote(note) {
-    store.update(draft => {
-      const index = draft.studioNotes.findIndex(item => item.id === note.id);
-      if (index === -1) draft.studioNotes.unshift(note);
-      else draft.studioNotes[index] = note;
-      if (note.exhibitionId) ensureThemeForNote(draft, note);
-    });
-    await DESKTOP_WORKSPACE?.flushWorkspace?.();
-  },
+  saveNote: saveWorkspaceThought,
+  saveLegacyNote: note => saveWorkspaceThought(note, { legacy: true }),
+  deleteNote: deleteWorkspaceThought,
+  openSource: openThoughtSource,
+  askTag: askTagAboutThought,
+  notify: showCaptureToast,
 });
 render();

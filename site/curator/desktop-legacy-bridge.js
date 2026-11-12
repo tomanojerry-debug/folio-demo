@@ -8,6 +8,7 @@ import { mountArticleReading } from './article-reading.js';
 import { curationStoryKey, renderCurationStory, mountCurationStory } from './curation-story.js';
 import { curationColor } from './curation-theme.js';
 import { mountReadingSettings } from './reading-settings.js';
+import { mountReadingNoteCapture, revealReadingNoteSource } from './reading-note-capture.js';
 import { loadPublicLibrary } from './public-library.js';
 import { icon } from '../prototype/immersive-exhibition/light-workspace.js';
 
@@ -103,7 +104,7 @@ async function bootstrap() {
   const shellReady = new Promise(resolve => { resolveShell = resolve; });
   let launchRequest = null, launchRevision = null;
   let suppressSave = false, writes = Promise.resolve(), failedOps = [], deferredRefresh = false;
-  let lastWriteError;
+  let lastWriteError, retryWorkspace;
   let syncing = false, syncAgain = false;
   let deferredDialog = false, drawnSelected = null, drawnStoryKey = null;
   const launchChat = createWorkspaceChatLauncher({
@@ -152,12 +153,20 @@ async function bootstrap() {
     status(publicWorkspace ? "正在保存到当前浏览器…" : "正在保存到这台电脑…");
     writes = writes.then(async () => {
       const batch = [...failedOps, ...ops];
+      if (!batch.length) return;
       try { remote = (await api("workspace", { ops: batch })).state; failedOps = []; lastWriteError = null; status(""); }
       catch (error) { failedOps = batch; lastWriteError = error; status(`尚未保存：${errorMessage(error)}`, true); }
     });
   }
-  async function flushWorkspace() {
+  async function flushWorkspace({ retry = false } = {}) {
     await writes;
+    if (retry && failedOps.length) {
+      if (!retryWorkspace) {
+        queueWorkspace([]);
+        retryWorkspace = writes.finally(() => { retryWorkspace = null; });
+      }
+      await retryWorkspace;
+    }
     if (failedOps.length) throw lastWriteError || new Error("手记尚未保存，请重试。");
   }
   function syncReading() {
@@ -242,11 +251,17 @@ async function bootstrap() {
       const autoTopic = remote?.capabilities?.autoCurate ? "满足条件的本地收藏会自动整理成专题。" : "";
       const manualExhibition = remote?.capabilities?.aiEnabled ? "" : "整理完整展览需要配置智能服务。";
       dialog.style.removeProperty('--folio-exhibition-color');
-      dialog.innerHTML = `<header class="forme-live-head"><div><small>Folio · 本机资料</small><h2>处理记录</h2></div><button type="button" data-desktop="close" aria-label="关闭">×</button></header>
-        <p class="forme-live-muted">内容保存在这台电脑。${autoTopic}${manualExhibition}</p>
-        <div class="forme-live-actions"><button data-desktop="curate" ${qualified < 6 || !remote?.capabilities?.aiEnabled ? "disabled" : ""}>整理完整展览 <span>${qualified} / 6</span></button><button data-desktop="refresh">刷新状态</button></div>
-        ${renderTaskProgress(progressJobs, { limit: 16, completedLimit: 16 }) || "<p>通过「收新」添加网页、文字或图片。</p>"}
-        <h3>我的真实展览</h3>${exhibitions.map((item) => `<button class="forme-live-source" data-desktop="exhibition" data-id="${esc(item.id)}"><b>${esc(item.title)}</b><span>${item.status === "needs_review" ? "待核对草稿" : "打开展览"} ↗</span></button>`).join("") || "<p>新的展览会在后台整理完成后出现在这里。</p>"}`;
+      const sample = publicWorkspace && remote.conversations?.[0];
+      const progress = publicWorkspace ? (sample
+        ? `<button type="button" class="forme-live-source" data-desktop="collection" data-id="${esc(sample.id)}"><b>${esc(sample.title)}</b><span>打开已整理示例 ↗</span></button>`
+        : "<p>浏览器里还没有整理记录。</p>")
+        : renderTaskProgress(progressJobs, { limit: 16, completedLimit: 16 }) || "<p>通过「收新」添加网页、文字或图片。</p>";
+      const curate = publicWorkspace ? "" : `<button data-desktop="curate" ${qualified < 6 || !remote?.capabilities?.aiEnabled ? "disabled" : ""}>整理完整展览 <span>${qualified} / 6</span></button>`;
+      dialog.innerHTML = `<header class="forme-live-head"><div><small>Folio · ${publicWorkspace ? "Web 体验" : "本机资料"}</small><h2>处理记录</h2></div><button type="button" data-desktop="close" aria-label="关闭">×</button></header>
+        <p class="forme-live-muted">${publicWorkspace ? "示例整理与收藏笔记保存在当前浏览器。" : `内容保存在这台电脑。${autoTopic}${manualExhibition}`}</p>
+        <div class="forme-live-actions">${curate}<button data-desktop="refresh">刷新状态</button></div>
+        ${progress}
+        <h3>${publicWorkspace ? "示例展览" : "我的真实展览"}</h3>${exhibitions.map((item) => `<button class="forme-live-source" data-desktop="exhibition" data-id="${esc(item.id)}"><b>${esc(item.title)}</b><span>${item.status === "needs_review" ? "待核对草稿" : "打开展览"} ↗</span></button>`).join("") || "<p>新的展览会在后台整理完成后出现在这里。</p>"}`;
       frameGlassDialog(dialog);
     }
     if (noteDraft !== undefined && dialog.querySelector("[data-desktop-exhibition-note]")) dialog.querySelector("[data-desktop-exhibition-note]").value = noteDraft;
@@ -298,7 +313,7 @@ async function bootstrap() {
     event.preventDefault();
     native.postMessage({ action:"openExternal", url:anchor.href });
   });
-  readingSettings = mountReadingSettings({ api });
+  readingSettings = mountReadingSettings({ api, publicDemo: publicWorkspace });
   const adapter = {
     load: () => clone(current),
     save(next) {
@@ -310,8 +325,36 @@ async function bootstrap() {
     },
     clear() { status("私人收藏不会通过浏览器重置清除。", true); },
   };
+  async function openNoteSource(source) {
+    if (source?.surface === "exhibition") {
+      if (!current.liveExhibitions.some(item => item.id === source.exhibitionId)) return false;
+      liveAI.show(source.exhibitionId);
+      revealReadingNoteSource(dialog, source);
+      return true;
+    }
+    if (source?.surface !== "collection" || !current.collections.some(item => item.id === source.collectionId)) return false;
+    dialog?.close();
+    openCollection?.(source.collectionId);
+    syncReading();
+    if (source.kind !== "image" && Number.isSafeInteger(source.offset)) {
+      await articleReading?.openOriginal(source.collectionId, { documentVersionId:source.documentVersionId, offset:source.offset, container:readingContainer });
+      const reading = articleReading?.controller.getState();
+      const paragraph = reading?.article?.paragraphs?.find(item => item.id === source.paragraphId);
+      if (paragraph && Number.isSafeInteger(paragraph.start)) {
+        const start = source.offset - paragraph.start;
+        const quote = typeof source.text === "string" ? source.text.slice(0, paragraph.text.length - start).trimEnd() : "";
+        articleReading.controller.selectSource(paragraph.id, quote, start);
+      } else if (reading?.status === "error" && source.documentVersionId) {
+        await articleReading.open(source.collectionId, { container:readingContainer, forceReload:true });
+      }
+    } else {
+      if (source.kind === "text") await articleReading?.open(source.collectionId, { container:readingContainer });
+      revealReadingNoteSource(document.querySelector(".collection-glass-overlay"), source);
+    }
+    return true;
+  }
   window.__FORME_DESKTOP__ = {
-    initialState: clone(current), storage: adapter, liveAI, flushWorkspace,
+    initialState: clone(current), storage: adapter, liveAI, flushWorkspace, openNoteSource,
     ...(publicWorkspace ? { sampleURL, openSampleConversation } : { openChat }),
     ...(!publicWorkspace ? { async collectionCoverColor(collectionId) { return (await api("collection-cover/color", { collectionId })).color; } } : {}),
     onWorkspaceRender: () => { conversationShell?.syncVisibility(); knowledgePanel?.sync(); syncReading(); },
@@ -320,11 +363,19 @@ async function bootstrap() {
       articleReading = mountArticleReading({ api, getState: () => store.getState(),
         openCollection: id => openCollection?.(id), openExhibition: id => liveAI.show(id),
         onCreateNote: payload => config.openReadingNote?.(payload) });
+      const noteCapture = mountReadingNoteCapture({
+        getCollection: id => current.collections.find(item => item.id === (id ?? current.ui.collectionId)),
+        getExhibition: id => current.liveExhibitions.find(item => item.id === id),
+        getArticle: id => {
+          const reading = articleReading.controller.getState();
+          return reading.collectionId === id ? reading.article : null;
+        },
+      });
       if (!publicWorkspace) knowledgePanel = mountKnowledgePanel({ api, getState:() => store.getState(), openCollection:id => openCollection?.(id),
         openReading: (id, options) => { syncReading(); void articleReading.openOriginal(id, { ...options, container:readingContainer }); } });
       const readingObserver = new MutationObserver(syncReading);
       readingObserver.observe(document.body, { childList: true, subtree: true });
-      window.addEventListener('pagehide', () => { readingObserver.disconnect(); articleReading?.destroy(); }, { once: true });
+      window.addEventListener('pagehide', () => { noteCapture.destroy(); readingObserver.disconnect(); articleReading?.destroy(); }, { once: true });
       dialog = document.createElement("dialog"); dialog.className = "forme-live-dialog"; document.body.append(dialog);
       dialog.addEventListener('close', () => {
         if (!dialog.open) { curationStory?.destroy(); curationStory = null; deferredDialog = false; }
