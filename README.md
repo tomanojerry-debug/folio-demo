@@ -2,7 +2,9 @@
 
 Folio 把散落的链接和文字整理成可以回看、串联和继续写的个人展览。Tag 是 Folio 的桌面伙伴，陪你读网页、留下收藏、找回以前读过的资料。
 
-![Folio 示例展览《现代生活如何入画》，可切换速览、来源对照和脉络深读](assets/folio-preview.png)
+[![观看 Folio V6 产品演示，时长 50 秒](docs/folio-demo-v6-poster.jpg)](https://tomanojerry-debug.github.io/folio-demo/)
+
+[观看 Folio V6 演示（50 秒）](https://tomanojerry-debug.github.io/folio-demo/)
 
 本仓库包含 Web 工作台、macOS 客户端源码和可在本机打开的示例展览。
 
@@ -17,7 +19,7 @@ npm run dev
 
 打开 [http://127.0.0.1:4176/](http://127.0.0.1:4176/)。首次访问打开一个空白工作台，未配置模型时也可保存文字草稿。浏览器保存本机记录，清理站点数据后会丢失。
 
-要在浏览器中查看上图的预置演示馆，运行 `npm run desktop:server`，打开终端显示的本机地址并使用已填好的演示账号登录。此入口使用本机示例资料，包含 41 条收藏和 5 场展览。
+要在浏览器中查看预置演示馆，运行 `npm run desktop:server`，打开终端显示的本机地址并使用已填好的演示账号登录。此入口使用本机示例资料，包含 41 条收藏和 5 场展览。
 
 要用自己的模型，先运行 `cp .env.example .env`。在 `.env` 中配置 `ZHIPU_CODING_API_KEY`、模型名和至少 32 字符的随机 `FORME_SESSION_SECRET`。文本接口示例使用智谱的标准 API。请使用该 API 的应用凭据，并将模型名改为账号可用的模型。只用本地内存账本时，将 `FORME_WORKER_URL` 留空。配置与访问的服务地址都只在 Node 进程生效。启用图片理解需单独提供对应视觉模型的凭据。
 
