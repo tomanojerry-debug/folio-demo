@@ -7,7 +7,7 @@ https://github.com/user-attachments/assets/276a3aa9-d76f-43b5-8148-08c5501dbb5f
 [Web 在线体验](https://101.34.60.121/folio-demo/try/) · [Mac 本地安装（GitHub 源码）](#在-macos-上使用-tag)
 
 - **Web 在线体验**：打开即用，无需注册或配置模型。可以浏览 41 条示例收藏和 5 场展览，试用「收新」里的示例文字整理，也可以在手记里写想法、加图片、保存摘录并回到出处。网页版没有独立悬浮的桌面小助手，也不支持窗口吸附。网页内的 Tag 只识别示例库链接。手记和阅读偏好保存在当前浏览器。
-- **Mac 本地安装**：从 GitHub 下载源码，在 macOS 13 或更新版本上本地编译。Tag 可以吸附窗口、读取所选浏览器页面。个人收藏、对话和手记保存在本机。只想看示例时，可以使用无需配置模型的演示模式。
+- **Mac 本地安装**：从 GitHub 下载源码，在 macOS 13 或更新版本上本地编译。Tag 可以吸附窗口、读取所选浏览器页面。个人收藏、对话和手记保存在本机。只想看示例时，可以使用无需配置模型的演示模式。 也可以让 Codex 等 Coding Agent 帮忙安装和接入模型。[查看可复制指令](#在-macos-上使用-tag)
 - **接入模型**：在 Mac 个人模式使用模型问答时，请在本机 Folio 填写服务商提供的 **Chat Completions 兼容 API 地址、准确的模型名称和对应的 API Key**。API Key 只在本机 Folio 填写。问答所需的内容会发送给你选择的模型服务。
 
 [产品设计](#产品设计) · [Agent 设计](#agent-设计) · [Harness 设计](#harness-设计) · [记忆设计](#记忆设计)
@@ -97,6 +97,14 @@ npm run dev
 
 ## 在 macOS 上使用 Tag
 
+可以把下面的指令复制给 Codex 等 Coding Agent。先把方括号里的内容换成你要用的模型服务商和模型名称。
+
+```text
+请帮我在这台 Mac 上从 https://github.com/tomanojerry-debug/folio-demo 安装并启动 Folio，接入 [模型服务商] 的 [模型名称]。
+请确认兼容 Chat Completions 的 API 地址和准确的模型名称，并打开 Folio 的模型设置页。
+API Key 由我本人在本机 Folio 填写。请勿索取、读取、记录或传输 API Key，也不要泄露本机的私人信息。
+```
+
 在 Mac 上从 GitHub 拉取源码并本地编译。需要 macOS 13 或更新版本、Node.js 22 和带 Git、Swift 的 Xcode Command Line Tools。若还未安装命令行工具，在终端运行 `xcode-select --install`。
 
 ```sh
@@ -107,10 +115,6 @@ npm run desktop -- --personal --setup-model
 ```
 
 首次运行会编译并打开 Folio。按页面提示填写支持 Chat Completions 的 API 地址、模型名称和自己的 API Key。连接成功后即可和 Tag 对话。之后在源码目录再次运行 `npm run desktop -- --personal --setup-model` 即可启动，模型配置会保留在本机。Key 保存在仅本机用户可读取的配置文件中。模型问答会把相关内容发送给你选择的模型服务。
-
-如果不确定 API 地址和模型名，可以把下面这段交给常用的 Coding Agent。
-
-> 请帮我确认如何在 Folio 接入我指定的模型。告诉我兼容 Chat Completions 的 API 地址和准确的模型名。API Key 由我本人在这台 Mac 的 Folio 设置页填写。请勿索取、读取或传输 Key，也不要把它写入聊天、代码、日志或 GitHub。
 
 只想浏览示例时，从 Folio 菜单退出后运行 `npm run desktop`。演示馆包含预置收藏和展览，无需模型，数据写入 `.data/folio-demo/`。
 
