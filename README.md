@@ -6,7 +6,7 @@ Folio 把散落的链接和文字整理成可以回看、串联和继续写的�
 
 [观看 Folio V6 演示（60 秒）](https://tomanojerry-debug.github.io/folio-demo/)
 
-[Web 在线体验](https://101.34.60.121/folio-demo/try/) · [下载 Mac 客户端源码](https://github.com/tomanojerry-debug/folio-demo/archive/refs/heads/main.zip) · [本地安装说明](#在-macos-上使用-tag)
+[Web 在线体验](https://101.34.60.121/folio-demo/try/) · [Mac 本地安装（GitHub 源码）](#在-macos-上使用-tag)
 
 Web 体验版的 Tag 仅支持输入示例库链接，暂不支持小助手吸附功能。
 
@@ -35,14 +35,16 @@ npm run dev
 
 ## 在 macOS 上使用 Tag
 
-下载并解压源码。需要 macOS 13 或更新版本、Node.js 22 和带 Swift 的 Xcode Command Line Tools。若还未安装命令行工具，运行 `xcode-select --install`。
+在 Mac 上从 GitHub 拉取源码并本地编译。需要 macOS 13 或更新版本、Node.js 22 和带 Git、Swift 的 Xcode Command Line Tools。若还未安装命令行工具，在终端运行 `xcode-select --install`。
 
 ```sh
+git clone https://github.com/tomanojerry-debug/folio-demo.git
+cd folio-demo
 npm ci
 npm run desktop -- --personal --setup-model
 ```
 
-首次启动会从源码编译 Folio。按页面提示填写支持 Chat Completions 的 API 地址、模型名称和自己的 API Key。连接成功后即可和 Tag 对话。Key 保存在仅本机用户可读取的配置文件中。模型问答会把相关内容发送给你选择的模型服务。
+首次运行会编译并打开 Folio。按页面提示填写支持 Chat Completions 的 API 地址、模型名称和自己的 API Key。连接成功后即可和 Tag 对话。之后在源码目录再次运行 `npm run desktop -- --personal --setup-model` 即可启动，模型配置会保留在本机。Key 保存在仅本机用户可读取的配置文件中。模型问答会把相关内容发送给你选择的模型服务。
 
 如果不确定 API 地址和模型名，可以把下面这段交给常用的 Coding Agent。
 
@@ -54,7 +56,7 @@ npm run desktop -- --personal --setup-model
 
 桌面联网搜索默认关闭。要启用，在本机 `.env` 中设置 `ZHIPU_WEB_SEARCH_MCP_URL` 和独立的 `ZHIPU_WEB_SEARCH_API_KEY`，使用具备智谱联网搜索 MCP 权限的凭据。
 
-`npm run desktop:build` 构建引用当前源码和本机 Node 的 `desktop/.build/Folio.app`。独立安装包可在 Git 检出目录运行 `npm run desktop:package` 构建，需要 Developer ID 签名及 Apple 公证。Tag 的原生窗口识别和浏览器协作可能需要 macOS 授权。
+Tag 的原生窗口识别和浏览器协作可能需要 macOS 授权。
 
 ## 项目结构
 
